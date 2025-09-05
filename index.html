@@ -9,12 +9,35 @@
     :root{
       --win-gray:#c0c0c0; --win-dark:#808080; --win-darker:#404040; --win-light:#dfdfdf; --win-white:#ffffff; --win-blue:#000080; --ink:#000000;
       --accent:#00ff66; /* avatar only */
+      --ui-scale:0.9; /* default -10% scale */
     }
     *{box-sizing:border-box;}
-    body{margin:0; font-family:Tahoma, Verdana, "MS Sans Serif", system-ui, sans-serif; background:#2f7f81; color:var(--ink); height:100vh; display:flex; align-items:center; justify-content:center}
+
+    /* top padding + align from top so it isn’t glued to the edge */
+    body{
+      margin:0;
+      font-family:Tahoma, Verdana, "MS Sans Serif", system-ui, sans-serif;
+      background:#2f7f81;
+      color:var(--ink);
+      min-height:100vh;
+      display:flex;
+      align-items:flex-start;     /* was center */
+      justify-content:center;
+      padding-top:8px;            /* small gap */
+    }
 
     /* Window shell */
-    .app{position:relative; width:96vw; height:94vh; background:var(--win-gray); display:grid; grid-template-rows:auto 1fr auto; overflow:hidden;}
+    .app{
+      position:relative;
+      width:calc(96vw / var(--ui-scale));
+      height:calc(92vh / var(--ui-scale));  /* was 94vh */
+      background:var(--win-gray);
+      display:grid;
+      grid-template-rows:auto 1fr auto;
+      overflow:hidden;
+      transform:scale(var(--ui-scale));
+      transform-origin:top center;
+    }
     .bevel{border:2px solid var(--win-dark); border-right-color:var(--win-white); border-bottom-color:var(--win-white);} /* recessed */
     .bevel-out{border:2px solid var(--win-white); border-right-color:var(--win-darker); border-bottom-color:var(--win-darker);} /* raised */
     .pane{background:var(--win-light)}
@@ -24,7 +47,7 @@
     .brand{display:flex; align-items:center; gap:8px}
     .brand svg{display:block}
     .brand .title{font-weight:700; letter-spacing:.4px}
-    .window-controls{display:none}
+    .window-controls{display:flex; gap:6px; align-items:center}
 
     main{display:grid; grid-template-columns:300px 1fr; gap:8px; padding:8px; min-height:0}
 
@@ -70,10 +93,29 @@
     /* tiny neon avatar animation */
     @keyframes neonPulse{0%,100%{opacity:.9}50%{opacity:.6}}
     .avatar path{stroke:var(--accent); animation:neonPulse 1.8s linear infinite}
-  .panel{overflow:visible}
-.slider select{width:100%;min-width:0}
-.slider select.btn{padding:2px 6px}
-</style>
+
+    /* small fixes */
+    .panel{overflow:visible}
+    .slider select{width:100%;min-width:0}
+    .slider select.btn{padding:2px 6px}
+
+    /* Help popup */
+    .howto{position:absolute; top:44px; right:12px; width:min(360px, 90vw); background:var(--win-light); padding:8px; z-index:50; display:none}
+    .howto.show{display:block}
+    .howto header{display:flex; align-items:center; justify-content:space-between; font-weight:700; margin-bottom:6px}
+    .howto .body{font-size:.9rem; line-height:1.25}
+    .howto .body ol{margin:6px 0 0 18px}
+
+    /* Responsive/mobile */
+    @media (max-width: 900px){
+      :root{ --ui-scale:1; }
+      body{align-items:stretch; justify-content:stretch; padding-top:6px;}
+      .app{width:100vw; height:100vh; transform:none}
+      main{grid-template-columns:1fr}
+      .stage{grid-template-rows:auto minmax(160px, 45vh) auto}
+      .btn.sq{width:40px; height:36px}
+    }
+  </style>
 </head>
 <body>
 <div class="app bevel">
@@ -85,7 +127,9 @@
       </svg>
       <div class="title">RADIOFRIER</div>
     </div>
-    <div class="window-controls"></div>
+    <div class="window-controls">
+      <button id="helpBtn" class="btn bevel-out">How to Fry</button>
+    </div>
   </header>
 
   <main>
@@ -166,6 +210,24 @@
   </main>
 
   <footer class="pane bevel">No tracking. Local only.</footer>
+
+  <!-- Popup: How to Fry -->
+  <div id="howto" class="howto bevel">
+    <header>
+      <span>How to Fry — Quick Guide</span>
+      <button id="howtoClose" class="btn bevel-out">✕</button>
+    </header>
+    <div class="body">
+      <ol>
+        <li>Click <b>📁 Choose File</b> or <b>🎙 Use Mic</b>.</li>
+        <li>Press <b>▶</b> to preview. Scrub with the seek bar.</li>
+        <li>Toggle <b>Effects</b> and choose a <b>Reverb Preset</b>.</li>
+        <li>Tune <b>Filter</b>, <b>Pitch</b>, <b>Volume</b>.</li>
+        <li>Optional: <b>↺ Reverse</b>, <b>● Rec</b> to capture post-FX.</li>
+        <li>Happy? Click <b>Export WAV</b> to bake the chain offline.</li>
+      </ol>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -195,6 +257,9 @@
   const curT = document.getElementById('curT');
   const durT = document.getElementById('durT');
   const resetBtn = document.getElementById('reset');
+  const helpBtn = document.getElementById('helpBtn');
+  const howto = document.getElementById('howto');
+  const howtoClose = document.getElementById('howtoClose');
 
   // Audio graph state
   let audioCtx; let analyser; let source; let gain; let filter; let playerSource=null;
@@ -404,7 +469,7 @@
   function stopMic(){ if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; } micSource=null; if (playerSource){ source = playerSource; rebuildGraph(); } micBtn.dataset.active='false'; micBtn.textContent='🎙️ Use Mic'; }
   micBtn.addEventListener('click', ()=>{ micStream ? stopMic() : startMic(); });
 
-  // Record post‑FX
+  // Record post-FX
   recordBtn.addEventListener('click', ()=>{
     ensureContext();
     if(!recorder || recorder.state==='inactive'){
@@ -456,6 +521,10 @@
   setCanvasSize();
   ensureContext();
   requestAnimationFrame(visualize);
+
+  // Help popup
+  if (helpBtn && howto){ helpBtn.addEventListener('click', ()=>{ howto.classList.toggle('show'); }); }
+  if (howtoClose){ howtoClose.addEventListener('click', ()=> howto.classList.remove('show')); }
 })();
 </script>
 </body>
