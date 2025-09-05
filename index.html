@@ -1,133 +1,151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>RADIOFRIER</title>
-  <style>
-    /* ===== Windows-90s / blocky plugin theme ===== */
-    :root{
-      --win-gray:#c0c0c0; --win-dark:#808080; --win-darker:#404040; --win-light:#dfdfdf; --win-white:#ffffff; --win-blue:#000080; --ink:#000000;
-      --accent:#00ff66; /* avatar only */
-      --ui-scale:0.9; /* default -10% scale */
-    }
-    *{box-sizing:border-box;}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>RADIOFRIER</title>
+<style>
+  :root{
+    /* Retro 95 (default) */
+    --win-gray:#c0c0c0; --win-dark:#808080; --win-darker:#404040; --win-light:#dfdfdf; --win-white:#ffffff; --win-blue:#000080; --ink:#000000;
+    --accent:#00ff66;
+    --gap:8px; --btn-h:40px;
+  }
+  *{box-sizing:border-box}
 
-    /* top padding + align from top so it isn’t glued to the edge */
-    body{
-      margin:0;
-      font-family:Tahoma, Verdana, "MS Sans Serif", system-ui, sans-serif;
-      background:#2f7f81;
-      color:var(--ink);
-      min-height:100vh;
-      display:flex;
-      align-items:flex-start;     /* was center */
-      justify-content:center;
-      padding-top:8px;            /* small gap */
-    }
+  /* Desktop scaling set in JS to keep everything in view */
+  body{
+    margin:0; font-family:Tahoma,Verdana,"MS Sans Serif",system-ui,sans-serif;
+    background:#2f7f81; color:var(--ink);
+    min-height:100dvh; display:flex; align-items:flex-start; justify-content:center;
+    padding-top:8px; overflow:hidden;
+  }
 
-    /* Window shell */
-    .app{
-      position:relative;
-      width:calc(96vw / var(--ui-scale));
-      height:calc(92vh / var(--ui-scale));  /* was 94vh */
-      background:var(--win-gray);
-      display:grid;
-      grid-template-rows:auto 1fr auto;
-      overflow:hidden;
-      transform:scale(var(--ui-scale));
-      transform-origin:top center;
-    }
-    .bevel{border:2px solid var(--win-dark); border-right-color:var(--win-white); border-bottom-color:var(--win-white);} /* recessed */
-    .bevel-out{border:2px solid var(--win-white); border-right-color:var(--win-darker); border-bottom-color:var(--win-darker);} /* raised */
-    .pane{background:var(--win-light)}
+  /* Base canvas (JS scales to fit) */
+  .app{
+    position:relative;
+    width:1280px;            /* BASE WIDTH */
+    height:760px;            /* BASE HEIGHT */
+    background:var(--win-gray);
+    display:grid; grid-template-rows:auto 1fr auto;
+    overflow:hidden;
+    transform-origin:top center;
+  }
+  .bevel{border:2px solid var(--win-dark); border-right-color:var(--win-white); border-bottom-color:var(--win-white)}
+  .bevel-out{border:2px solid var(--win-white); border-right-color:var(--win-darker); border-bottom-color:var(--win-darker)}
+  .pane{background:var(--win-light)}
 
-    /* Title bar */
-    header.titlebar{display:flex; align-items:center; justify-content:space-between; background:var(--win-blue); color:#fff; padding:4px 6px}
-    .brand{display:flex; align-items:center; gap:8px}
-    .brand svg{display:block}
-    .brand .title{font-weight:700; letter-spacing:.4px}
-    .window-controls{display:flex; gap:6px; align-items:center}
+  /* Title bar */
+  header.titlebar{display:flex; align-items:center; justify-content:space-between; background:var(--win-blue); color:#fff; padding:4px 6px}
+  .brand{display:flex; align-items:center; gap:8px}
+  .brand .title{font-weight:700; letter-spacing:.4px}
+  .window-controls{display:flex; gap:6px; align-items:center}
 
-    main{display:grid; grid-template-columns:300px 1fr; gap:8px; padding:8px; min-height:0}
+  main{display:grid; grid-template-columns:320px 1fr; gap:var(--gap); padding:var(--gap); min-height:0}
 
-    /* Left panel */
-    .panel{background:var(--win-light)}
-    .group{padding:8px; margin:0; display:flex; flex-direction:column; gap:8px}
-    .group.bottom{margin-top:auto}
-    .label{font-size:.9rem}
+  /* Left panel */
+  .panel{background:var(--win-light); overflow:visible}
+  .group{padding:var(--gap); display:flex; flex-direction:column; gap:var(--gap)}
+  .label{font-size:.9rem}
 
-    .row{display:flex; gap:8px; flex-wrap:wrap}
-    .grid-2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px}
-    .btn{appearance:none; font:inherit; color:var(--ink); background:var(--win-gray); padding:6px 8px; cursor:pointer; border:none}
-    .btn.bevel-out{border:2px solid var(--win-white); border-right-color:var(--win-darker); border-bottom-color:var(--win-darker)}
-    .btn[data-active="true"]{background:#ffe28a}
+  .btn{
+    appearance:none; font:inherit; color:var(--ink); background:var(--win-gray);
+    padding:6px 8px; cursor:pointer; border:none; height:var(--btn-h);
+    display:inline-flex; align-items:center; justify-content:center; min-width:0
+  }
+  .btn.bevel-out{border:2px solid var(--win-white); border-right-color:var(--win-darker); border-bottom-color:var(--win-darker)}
+  .btn[data-active="true"]{background:#ffe28a}
 
-    .slider{display:grid; grid-template-columns:120px 1fr 60px; gap:8px; align-items:center}
-    .slider input[type=range]{width:100%; height:24px; background:transparent; -webkit-appearance:none; appearance:none}
-    .slider input[type=range]::-webkit-slider-runnable-track{height:8px; background:var(--win-dark)}
-    .slider input[type=range]::-moz-range-track{height:8px; background:var(--win-dark)}
-    .slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; height:18px; background:var(--win-gray); border:2px solid var(--win-darker); margin-top:-5px}
-    .slider input[type=range]::-moz-range-thumb{width:16px; height:18px; background:var(--win-gray); border:2px solid var(--win-darker)}
-    .slider output{text-align:right}
+  #presets{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap)}
+  #presets .btn{width:100%}
+  #reset{width:100%}
 
-    /* Right stage */
-    .stage{display:grid; grid-template-rows:auto minmax(260px,1fr) auto; gap:8px; min-height:0}
-    .topbar{background:var(--win-light); padding:6px}
-    .topbar .controls{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
-    input[type=file]{display:none}
-    .filebtn{display:inline-flex; align-items:center; justify-content:center}
-    .filename{font-size:.9rem; opacity:.9}
+  .grid-2{display:grid; grid-template-columns:repeat(2,1fr); gap:6px}
+  .grid-2 .btn{width:100%}
 
-    canvas#visualizer{width:100%; height:100%; background:#000; image-rendering:pixelated; display:block}
+  .slider{display:grid; grid-template-columns:120px 1fr 60px; gap:var(--gap); align-items:center}
+  .slider input[type=range]{width:100%; height:24px; background:transparent; -webkit-appearance:none; appearance:none}
+  .slider input[type=range]::-webkit-slider-runnable-track{height:8px; background:var(--win-dark)}
+  .slider input[type=range]::-moz-range-track{height:8px; background:var(--win-dark)}
+  .slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:16px; height:18px; background:var(--win-gray); border:2px solid var(--win-darker); margin-top:-5px}
+  .slider input[type=range]::-moz-range-thumb{width:16px; height:18px; background:var(--win-gray); border:2px solid var(--win-darker)}
+  .slider output{text-align:right}
+  .slider select{width:100%; min-width:0}
+  .slider select.btn{padding:2px 6px}
 
-    .player{display:flex; align-items:center; gap:6px; background:var(--win-light); padding:6px 8px; min-height:52px}
-    .btn.sq{display:flex;align-items:center;justify-content:center;width:44px;height:40px;font-weight:700}
-    #seek{flex:1; position:relative; top:-1px}
-    .time{min-width:5ch; text-align:center}
-    #seek::-webkit-slider-runnable-track{height:10px; background:var(--win-dark)}
-    #seek::-moz-range-track{height:10px; background:var(--win-dark)}
-    #seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:18px;background:var(--win-gray);border:2px solid var(--win-darker);margin-top:-4px}
-    #seek::-moz-range-thumb{width:14px;height:18px;background:var(--win-gray);border:2px solid var(--win-darker)}
+  /* Right stage */
+  .stage{display:grid; grid-template-rows:auto minmax(240px,1fr) auto; gap:var(--gap); min-height:0}
+  .topbar{background:var(--win-light); padding:6px}
+  .topbar .controls{display:flex; align-items:center; gap:6px; flex-wrap:wrap}
+  input[type=file]{display:none}
+  .filebtn{display:inline-flex; align-items:center; justify-content:center}
+  .filename{font-size:.9rem; opacity:.9}
 
-    /* tiny neon avatar animation */
-    @keyframes neonPulse{0%,100%{opacity:.9}50%{opacity:.6}}
-    .avatar path{stroke:var(--accent); animation:neonPulse 1.8s linear infinite}
+  canvas#visualizer{width:100%; height:100%; background:#000; image-rendering:pixelated; display:block}
 
-    /* small fixes */
-    .panel{overflow:visible}
-    .slider select{width:100%;min-width:0}
-    .slider select.btn{padding:2px 6px}
+  .player{display:flex; align-items:center; gap:6px; background:var(--win-light); padding:6px 8px; min-height:52px}
+  .btn.sq{width:var(--btn-h); height:var(--btn-h); font-weight:700}
+  #seek{flex:1; position:relative; top:-1px}
+  .time{min-width:5ch; text-align:center}
+  #seek::-webkit-slider-runnable-track{height:10px; background:var(--win-dark)}
+  #seek::-moz-range-track{height:10px; background:var(--win-dark)}
+  #seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:18px;background:var(--win-gray);border:2px solid var(--win-darker);margin-top:-4px}
+  #seek::-moz-range-thumb{width:14px;height:18px;background:var(--win-gray);border:2px solid var(--win-darker)}
 
-    /* Help popup */
-    .howto{position:absolute; top:44px; right:12px; width:min(360px, 90vw); background:var(--win-light); padding:8px; z-index:50; display:none}
-    .howto.show{display:block}
-    .howto header{display:flex; align-items:center; justify-content:space-between; font-weight:700; margin-bottom:6px}
-    .howto .body{font-size:.9rem; line-height:1.25}
-    .howto .body ol{margin:6px 0 0 18px}
+  /* Help popup */
+  .howto{position:absolute; top:44px; right:12px; width:min(380px, 92vw); background:var(--win-light); padding:8px; z-index:50; display:none}
+  .howto.show{display:block}
+  .howto header{display:flex; align-items:center; justify-content:space-between; font-weight:700; margin-bottom:6px}
+  .howto .body{font-size:.95rem; line-height:1.35}
+  .howto .body li{margin:6px 0}
 
-    /* Responsive/mobile */
-    @media (max-width: 900px){
-      :root{ --ui-scale:1; }
-      body{align-items:stretch; justify-content:stretch; padding-top:6px;}
-      .app{width:100vw; height:100vh; transform:none}
-      main{grid-template-columns:1fr}
-      .stage{grid-template-rows:auto minmax(160px, 45vh) auto}
-      .btn.sq{width:40px; height:36px}
-    }
-  </style>
+  /* ------- SKINS ------- */
+
+  /* Dark-Ops (replaces Neon Dream): covert, matte, no glow */
+  .skin-darkops{
+    --win-gray:#1d211d;     /* surfaces */
+    --win-light:#161a16;    /* panels */
+    --win-dark:#0e120e;     /* inset */
+    --win-darker:#000000;   /* deep edge */
+    --win-white:#3d443d;    /* highlight edge */
+    --win-blue:#0f2710;     /* title bar: ops green */
+    --ink:#dfe7df;          /* text */
+    --accent:#8fd27a;       /* subtle green for avatar */
+  }
+  .skin-darkops .btn{background:#1b201b; color:var(--ink)}
+  /* No shadows/glow — classic hard bevels already applied by variables */
+
+  /* Office Glow (kept) */
+  .skin-office{
+    --win-gray:#dfe3ee; --win-light:#f6f7fb; --win-dark:#cfd5e4; --win-darker:#9094a8;
+    --win-white:#ffffff; --win-blue:#1f3aa2; --ink:#111;
+  }
+  .skin-office .bevel{border-radius:8px; box-shadow:inset 0 1px 0 #fff, inset 0 -1px 0 #cfd5e4, 0 10px 24px rgba(0,0,0,.18)}
+  .skin-office .bevel-out{border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.18)}
+  .skin-office .btn{border-radius:6px}
+
+  /* Mobile: allow scroll, no transform scaling */
+  @media (max-width:900px){
+    :root{ --btn-h:36px }
+    body{align-items:stretch; justify-content:stretch; padding-top:8px; overflow:auto}
+    .app{width:100%; height:auto; transform:none}
+    main{grid-template-columns:1fr}
+    .stage{grid-template-rows:auto minmax(180px, 45dvh) auto}
+    .btn{font-size:.95rem}
+  }
+</style>
 </head>
 <body>
-<div class="app bevel">
+<div class="app bevel" id="app">
   <header class="titlebar">
     <div class="brand">
-      <!-- Neon radio avatar (tiny, only here) -->
       <svg class="avatar" width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M2 6h18v7H2zM4 5l12-4M5 10h6M6 8h8M16 9v3M4 9v3" stroke-width="2"/>
+        <path d="M2 6h18v7H2zM4 5l12-4M5 10h6M6 8h8M16 9v3M4 9v3" stroke="var(--accent)" stroke-width="2"/>
       </svg>
       <div class="title">RADIOFRIER</div>
     </div>
     <div class="window-controls">
+      <button id="skinBtn" class="btn bevel-out">Skin: Retro 95</button>
       <button id="helpBtn" class="btn bevel-out">How to Fry</button>
     </div>
   </header>
@@ -137,7 +155,7 @@
     <aside class="panel bevel">
       <div class="group">
         <div class="label">Presets</div>
-        <div class="row" id="presets">
+        <div id="presets">
           <button class="btn bevel-out" data-preset="CHARRED">CHARRED</button>
           <button class="btn bevel-out" data-preset="BAKED">BAKED</button>
           <button class="btn bevel-out" data-preset="FRIED">FRIED</button>
@@ -153,6 +171,7 @@
           <button class="btn bevel-out" data-effect="crush">Crush</button>
           <button class="btn bevel-out" data-effect="glitch">Glitch</button>
         </div>
+
         <label class="slider" style="grid-template-columns:120px 1fr; align-items:center">
           <span>Reverb Preset</span>
           <select id="reverbPreset" class="btn bevel-out" style="height:26px">
@@ -171,24 +190,21 @@
         <label class="slider"><span>Filter Freq</span> <input id="freq" type="range" min="200" max="4000" step="10" value="1200"/> <output id="freqOut">1200Hz</output></label>
         <label class="slider"><span>Pitch (Speed)</span> <input id="pitch" type="range" min="0.5" max="1.5" step="0.01" value="1"/> <output id="pitchOut">1.00×</output></label>
         <label class="slider"><span>Volume</span> <input id="vol" type="range" min="0" max="2" step="0.01" value="1"/> <output id="volOut">1.00</output></label>
-        <div class="row">
-          <button id="reverse" class="btn bevel-out">↺ Reverse</button>
-          <button id="record" class="btn bevel-out">● Rec</button>
-          <button id="export" class="btn bevel-out">Export WAV</button>
-        </div>
-      </div>
 
-      <div class="group bottom">
-        <div class="row">
-          <button id="micBtn" class="btn bevel-out">🎙️ Use Mic</button>
-        </div>
+        <!-- Four full-width stacked buttons -->
+        <button id="reverse" class="btn bevel-out" style="width:100%">↺ Reverse</button>
+        <button id="record"  class="btn bevel-out" style="width:100%">● Rec</button>
+        <button id="micBtn"  class="btn bevel-out" style="width:100%">🎙️ Use Mic</button>
+        <button id="export"  class="btn bevel-out" style="width:100%">Export WAV</button>
       </div>
     </aside>
 
     <!-- Right: stage -->
     <section class="stage">
       <div class="topbar bevel">
-        <div class="row" style="font-size:.95rem">Tip: Toggle effects then use Export WAV to render offline with the exact chain.</div>
+        <div class="row" style="font-size:.95rem">
+          Tip: Choose a file or mic, tweak effects, then Export WAV to bake the exact chain.
+        </div>
         <div class="controls">
           <input type="file" id="file" accept="audio/*"/>
           <label for="file" class="btn bevel-out filebtn" id="fileBtn">📁 Choose File</label>
@@ -219,12 +235,13 @@
     </header>
     <div class="body">
       <ol>
-        <li>Click <b>📁 Choose File</b> or <b>🎙 Use Mic</b>.</li>
-        <li>Press <b>▶</b> to preview. Scrub with the seek bar.</li>
-        <li>Toggle <b>Effects</b> and choose a <b>Reverb Preset</b>.</li>
-        <li>Tune <b>Filter</b>, <b>Pitch</b>, <b>Volume</b>.</li>
-        <li>Optional: <b>↺ Reverse</b>, <b>● Rec</b> to capture post-FX.</li>
-        <li>Happy? Click <b>Export WAV</b> to bake the chain offline.</li>
+        <li><b>Load audio</b>: Click <b>📁 Choose File</b> or enable <b>🎙 Use Mic</b> for live input.</li>
+        <li><b>Preview</b>: Press <b>▶</b> to play. Drag the bar to seek.</li>
+        <li><b>FX</b>: Toggle <b>Distortion</b>, <b>Echo</b>, <b>Crush</b>, <b>Glitch</b>. Pick a <b>Reverb Preset</b> for space.</li>
+        <li><b>Tune</b>: Adjust <b>Filter Freq</b> (tone), <b>Pitch (Speed)</b>, and <b>Volume</b>.</li>
+        <li><b>Reverse</b>: Flips your audio so it plays backward.</li>
+        <li><b>● Rec</b>: Captures exactly what you hear (post-FX) into a WebM file.</li>
+        <li><b>Export WAV</b>: Renders the whole chain offline to a high-quality WAV.</li>
       </ol>
     </div>
   </div>
@@ -233,7 +250,35 @@
 <script>
 (() => {
   'use strict';
-  // Elements
+
+  /* ---------- Fit-to-viewport scaling (desktop only) ---------- */
+  const appEl = document.getElementById('app');
+  const BASE_W = 1280, BASE_H = 760, MARGIN = 16;
+  function fitToViewport(){
+    if (window.matchMedia('(max-width:900px)').matches){
+      appEl.style.transform = 'none';
+      appEl.style.width = '100%';
+      appEl.style.height = 'auto';
+      document.body.style.overflow = 'auto';
+      return;
+    }
+    appEl.style.width = BASE_W + 'px';
+    appEl.style.height = BASE_H + 'px';
+    const sw = (window.innerWidth  - MARGIN) / BASE_W;
+    const sh = (window.innerHeight - MARGIN) / BASE_H;
+    const scale = Math.min(1, sw, sh) * 0.98;
+    appEl.style.transform = `scale(${scale})`;
+    document.body.style.overflow = 'hidden';
+  }
+  window.addEventListener('resize', fitToViewport, {passive:true});
+  fitToViewport();
+
+  /* ---------- UI refs ---------- */
+  const skinBtn = document.getElementById('skinBtn');
+  const helpBtn = document.getElementById('helpBtn');
+  const howto = document.getElementById('howto');
+  const howtoClose = document.getElementById('howtoClose');
+
   const file = document.getElementById('file');
   const fileName = document.getElementById('fileName');
   const player = document.getElementById('player');
@@ -257,57 +302,72 @@
   const curT = document.getElementById('curT');
   const durT = document.getElementById('durT');
   const resetBtn = document.getElementById('reset');
-  const helpBtn = document.getElementById('helpBtn');
-  const howto = document.getElementById('howto');
-  const howtoClose = document.getElementById('howtoClose');
 
-  // Audio graph state
+  /* ---------- Skins ---------- */
+  const skins = ['classic','darkops','office'];  // swapped neon -> darkops
+  let skinIndex = 0;
+  function applySkin(k){
+    appEl.classList.remove('skin-darkops','skin-office');
+    if(k==='darkops') appEl.classList.add('skin-darkops');
+    if(k==='office')  appEl.classList.add('skin-office');
+    skinBtn.textContent = 'Skin: ' + (
+      k==='classic' ? 'Retro 95' :
+      k==='darkops' ? 'Dark-Ops' :
+      'Office Glow'
+    );
+  }
+  skinBtn.addEventListener('click', ()=>{ skinIndex=(skinIndex+1)%skins.length; applySkin(skins[skinIndex]); });
+  applySkin('classic');
+
+  /* ---------- Audio graph state ---------- */
   let audioCtx; let analyser; let source; let gain; let filter; let playerSource=null;
-  let nodes = {}; // effect nodes
+  let nodes = {};
   let originalBuffer=null; let originalURL=null; let reversedURL=null; let reversed=false;
   let recorder=null; let recordChunks=[];
   let micStream=null; let micSource=null; let loadedIRBuffer=null; let reverbWet=0.35;
-  const effect = { distortion:false, echo:false, crush:false, glitch:false };
+  const effect = { distortion:false, echo:false, crush:false, glitch:false, reverb:false };
   let glitchTimer=null;
 
-  const setCanvasSize = () => {
+  function setCanvasSize(){
     const dpr=Math.max(1,Math.min(2,window.devicePixelRatio||1));
     const rect=canvas.getBoundingClientRect();
     let w=Math.floor(rect.width), h=Math.floor(rect.height);
-    if(w<=0 || h<=0){ const p=canvas.parentElement; w = (p&&p.clientWidth)||640; h=(p&&p.clientHeight)||240; }
+    if(w<=0 || h<=0){ const p=canvas.parentElement; w=(p&&p.clientWidth)||640; h=(p&&p.clientHeight)||240; }
     canvas.width=Math.floor(w*dpr); canvas.height=Math.floor(h*dpr);
-  };
-  const fmt = (n)=>{ const t=Math.floor(n||0); const m=Math.floor(t/60); const s=String(t%60).padStart(2,'0'); return `${m}:${s}`; };
-  const dec2 = (n)=>Number(n).toFixed(2);
+  }
+  const fmt = n=>{ const t=Math.floor(n||0); const m=Math.floor(t/60); const s=String(t%60).padStart(2,'0'); return `${m}:${s}`; };
+  const dec2 = n=>Number(n).toFixed(2);
 
-  // --- Context init (no async/await) ---
+  /* ---------- Audio nodes ---------- */
   function ensureContext(){
     if(!audioCtx){
       audioCtx=new (window.AudioContext||window.webkitAudioContext)();
       analyser=audioCtx.createAnalyser(); analyser.fftSize=2048;
       gain=audioCtx.createGain();
       filter=audioCtx.createBiquadFilter(); filter.type='bandpass'; filter.frequency.value=+freq.value;
-      // Effects
+
       nodes.distortion=audioCtx.createWaveShaper();
       nodes.post=audioCtx.createBiquadFilter(); nodes.post.type='bandpass'; nodes.post.frequency.value=1000; nodes.post.Q.value=1.5;
       nodes.distGain=audioCtx.createGain(); nodes.distGain.gain.value=.4;
+
       nodes.delay=audioCtx.createDelay(); nodes.delay.delayTime.value=.25;
       nodes.feedback=audioCtx.createGain(); nodes.feedback.gain.value=.3; nodes.delay.connect(nodes.feedback); nodes.feedback.connect(nodes.delay);
+
       nodes.bit=audioCtx.createBiquadFilter(); nodes.bit.type='highshelf'; nodes.bit.frequency.value=8000; nodes.bit.gain.value=0;
       nodes.glitch=audioCtx.createGain(); nodes.glitch.gain.value=1;
-      nodes.convolver = nodes.convolver || audioCtx.createConvolver();
-      nodes.gainWet = nodes.gainWet || audioCtx.createGain(); nodes.gainWet.gain.value = reverbWet;
-      nodes.gainDry = nodes.gainDry || audioCtx.createGain(); nodes.gainDry.gain.value = 1 - reverbWet;
+
+      nodes.convolver = audioCtx.createConvolver();
+      nodes.gainWet  = audioCtx.createGain(); nodes.gainWet.gain.value  = reverbWet;
+      nodes.gainDry  = audioCtx.createGain(); nodes.gainDry.gain.value  = 1 - reverbWet;
+
       nodes.streamDest = audioCtx.createMediaStreamDestination();
     }
     if(audioCtx && audioCtx.state==='suspended'){ audioCtx.resume().catch(()=>{}); }
   }
 
   function makeCurve(amount=75){ const n=44100; const c=new Float32Array(n); for(let i=0;i<n;i++){ const x=i*2/n-1; c[i]=Math.tanh((amount+1)*x)/Math.tanh(amount+1); } return c; }
-
   function toggleGlitch(on){ if(!nodes.glitch) return; nodes.glitch.gain.value=1; if(glitchTimer){ clearInterval(glitchTimer); glitchTimer=null; } if(on){ glitchTimer=setInterval(()=>{ nodes.glitch.gain.value=Math.random()>.5?1:0; },30); } }
 
-  // Reverb IR loading
   const IR_MAP = {
     'small-room':'reverbs/small-room.wav',
     'cathedral':'reverbs/CathedralRoom.wav',
@@ -320,44 +380,40 @@
     if(!key || key==='off'){ loadedIRBuffer=null; return Promise.resolve(); }
     const url = IR_MAP[key]; if(!url){ loadedIRBuffer=null; return Promise.resolve(); }
     ensureContext();
-    return fetch(url)
-      .then(r=>r.arrayBuffer())
-      .then(ab=>audioCtx.decodeAudioData(ab))
-      .then(buf=>{ loadedIRBuffer = buf; if(nodes.convolver) nodes.convolver.buffer = loadedIRBuffer; })
-      .catch(()=>{ // fallback synthetic IR
-        const len = (audioCtx.sampleRate||48000) * 1.2; const ir = audioCtx.createBuffer(2, len, audioCtx.sampleRate);
-        for(let c=0;c<2;c++){ const d=ir.getChannelData(c); for(let i=0;i<len;i++){ d[i] = (Math.random()*2-1) * Math.pow(1-i/len, 3); } }
-        loadedIRBuffer = ir; if(nodes.convolver) nodes.convolver.buffer = loadedIRBuffer;
+    return fetch(url).then(r=>r.arrayBuffer()).then(ab=>audioCtx.decodeAudioData(ab))
+      .then(buf=>{ loadedIRBuffer=buf; nodes.convolver.buffer=buf; })
+      .catch(()=>{
+        const len=(audioCtx.sampleRate||48000)*1.2; const ir=audioCtx.createBuffer(2,len,audioCtx.sampleRate);
+        for(let c=0;c<2;c++){ const d=ir.getChannelData(c); for(let i=0;i<len;i++){ d[i]=(Math.random()*2-1)*Math.pow(1-i/len,3); } }
+        loadedIRBuffer=ir; nodes.convolver.buffer=ir;
       });
   }
 
   function rebuildGraph(){
     if(!audioCtx || !source) return;
     try{ source.disconnect(); }catch(e){}
-    [gain, analyser, filter, nodes.distortion, nodes.post, nodes.distGain, nodes.delay, nodes.feedback, nodes.bit, nodes.glitch].forEach(n=>{ if(n){ try{ n.disconnect(); }catch(e){} } });
-
-    if(!gain) gain = audioCtx.createGain();
-    if(!analyser){ analyser = audioCtx.createAnalyser(); analyser.fftSize=2048; }
-    if(!filter){ filter = audioCtx.createBiquadFilter(); filter.type='bandpass'; filter.frequency.value=+freq.value; }
+    [gain, analyser, filter, nodes.distortion, nodes.post, nodes.distGain, nodes.delay, nodes.feedback, nodes.bit, nodes.glitch, nodes.convolver, nodes.gainDry, nodes.gainWet].forEach(n=>{ if(n){ try{ n.disconnect(); }catch(e){} } });
 
     let last=source;
+    filter.type='bandpass'; filter.frequency.value=+freq.value;
     last.connect(filter); last=filter;
+
     if(effect.distortion){ nodes.distortion.curve=makeCurve(75); last.connect(nodes.distortion); nodes.distortion.connect(nodes.post); nodes.post.connect(nodes.distGain); last=nodes.distGain; }
     if(effect.echo){ last.connect(nodes.delay); last=nodes.delay; }
     if(effect.crush){ nodes.bit.gain.value=-40; last.connect(nodes.bit); last=nodes.bit; } else { nodes.bit.gain.value=0; }
     if(effect.glitch){ last.connect(nodes.glitch); last=nodes.glitch; }
 
-    // mix dry/wet if reverb is active
     gain.gain.value=+vol.value;
-    if(effect.reverb && nodes.convolver && loadedIRBuffer){
-      nodes.convolver.buffer = loadedIRBuffer;
-      nodes.gainDry.gain.value = 1 - reverbWet; nodes.gainWet.gain.value = reverbWet;
-      try{ last.disconnect(); }catch(e){}
+
+    if(effect.reverb && loadedIRBuffer){
+      nodes.convolver.buffer=loadedIRBuffer;
+      nodes.gainDry.gain.value=1-reverbWet; nodes.gainWet.gain.value=reverbWet;
       last.connect(nodes.gainDry); nodes.gainDry.connect(gain);
       last.connect(nodes.convolver); nodes.convolver.connect(nodes.gainWet); nodes.gainWet.connect(gain);
-    } else {
+    }else{
       last.connect(gain);
     }
+
     gain.connect(analyser);
     analyser.connect(audioCtx.destination);
     analyser.connect(nodes.streamDest);
@@ -365,54 +421,78 @@
 
   function visualize(){
     if(!analyser){ requestAnimationFrame(visualize); return; }
-    const data = new Uint8Array(analyser.fftSize);
+    const data=new Uint8Array(analyser.fftSize);
     ctx.clearRect(0,0,canvas.width,canvas.height);
     analyser.getByteTimeDomainData(data);
-    const w = canvas.width, h = canvas.height; const step = w/(data.length-1);
-    ctx.lineWidth = 2; ctx.strokeStyle = '#00ff66';
+    const w=canvas.width, h=canvas.height, step=w/(data.length-1);
+    ctx.lineWidth=2; ctx.strokeStyle='#00ff66';
     ctx.beginPath();
     for(let i=0;i<data.length;i++){
-      const x = i*step; const y = (data[i]/255)*h; i===0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      const x=i*step, y=(data[i]/255)*h; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
     }
     ctx.stroke();
     requestAnimationFrame(visualize);
   }
 
-  // File handling (no await)
   file.addEventListener('change', ()=>{
-    const f=file.files && file.files[0]; if(!f) return;
-    if (micStream) { stopMic(); }
-    fileName.textContent = f.name || 'No file chosen';
-    originalURL = URL.createObjectURL(f);
+    const f=file.files&&file.files[0]; if(!f) return;
+    if(micStream) stopMic();
+    fileName.textContent=f.name||'No file chosen';
+    originalURL=URL.createObjectURL(f);
     player.src=originalURL; player.load();
     ensureContext();
-    f.arrayBuffer()
-      .then(buf => audioCtx.decodeAudioData(buf))
-      .then(decoded => {
-        originalBuffer = decoded;
-        if(!playerSource){ playerSource = audioCtx.createMediaElementSource(player); }
-        source = playerSource; rebuildGraph();
-        player.playbackRate=+pitch.value; player.muted=false;
-      })
-      .catch(()=>{});
+    f.arrayBuffer().then(buf=>audioCtx.decodeAudioData(buf)).then(decoded=>{
+      originalBuffer=decoded;
+      if(!playerSource) playerSource=audioCtx.createMediaElementSource(player);
+      source=playerSource; rebuildGraph();
+      player.playbackRate=+pitch.value; player.muted=false;
+    }).catch(()=>{});
   });
 
-  // Reverse
-  function buildReversedURL(){ if(!originalBuffer) return null; const ch=originalBuffer.numberOfChannels, len=originalBuffer.length, sr=originalBuffer.sampleRate; const outBuf=new AudioBuffer({length:len, numberOfChannels:ch, sampleRate:sr}); for(let c=0;c<ch;c++){ const src=originalBuffer.getChannelData(c); const dst=outBuf.getChannelData(c); for(let i=0;i<len;i++){ dst[i]=src[len-1-i]; } } const total=len*ch*2; const ab=new ArrayBuffer(44+total); const view=new DataView(ab); let o=0; const ws=s=>{ for(let i=0;i<s.length;i++) view.setUint8(o+i, s.charCodeAt(i)); o+=s.length; }; ws('RIFF'); view.setUint32(o,36+total,true); o+=4; ws('WAVE'); ws('fmt '); view.setUint32(o,16,true); o+=4; view.setUint16(o,1,true); o+=2; view.setUint16(o,ch,true); o+=2; view.setUint32(o,sr,true); o+=4; view.setUint32(o,sr*ch*2,true); o+=4; view.setUint16(o,ch*2,true); o+=2; view.setUint16(o,16,true); o+=2; ws('data'); view.setUint32(o,total,true); o+=4; const inter=new Int16Array(total/2); let idx=0; for(let i=0;i<len;i++){ for(let c=0;c<ch;c++){ let v=outBuf.getChannelData(c)[i]*0x7FFF; v=Math.max(-32768,Math.min(32767,v)); inter[idx++]=v; } } for(let j=0;j<inter.length;j++) view.setInt16(44+j*2, inter[j], true); return URL.createObjectURL(new Blob([new DataView(ab)], {type:'audio/wav'})); }
-  function buildReversedBuffer(){ if(!originalBuffer) return null; const ch=originalBuffer.numberOfChannels, len=originalBuffer.length, sr=originalBuffer.sampleRate; const out=audioCtx.createBuffer(ch,len,sr); for(let c=0;c<ch;c++){ const s=originalBuffer.getChannelData(c), d=out.getChannelData(c); for(let i=0;i<len;i++){ d[i]=s[len-1-i]; } } return out; }
+  function buildReversedURL(){
+    if(!originalBuffer) return null;
+    const ch=originalBuffer.numberOfChannels,len=originalBuffer.length,sr=originalBuffer.sampleRate;
+    const outBuf=new AudioBuffer({length:len,numberOfChannels:ch,sampleRate:sr});
+    for(let c=0;c<ch;c++){ const src=originalBuffer.getChannelData(c), dst=outBuf.getChannelData(c); for(let i=0;i<len;i++){ dst[i]=src[len-1-i]; } }
+    const total=len*ch*2; const ab=new ArrayBuffer(44+total); const view=new DataView(ab); let o=0;
+    const ws=s=>{ for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); o+=s.length; };
+    ws('RIFF'); view.setUint32(o,36+total,true); o+=4; ws('WAVE'); ws('fmt '); view.setUint32(o,16,true); o+=4;
+    view.setUint16(o,1,true); o+=2; view.setUint16(o,ch,true); o+=2; view.setUint32(o,sr,true); o+=4; view.setUint32(o,sr*ch*2,true); o+=4; view.setUint16(o,ch*2,true); o+=2; view.setUint16(o,16,true); o+=2;
+    ws('data'); view.setUint32(o,total,true); o+=4; const inter=new Int16Array(total/2); let idx=0;
+    for(let i=0;i<len;i++){ for(let c=0;c<ch;c++){ let v=outBuf.getChannelData(c)[i]*0x7FFF; v=Math.max(-32768,Math.min(32767,v)); inter[idx++]=v; } }
+    for(let j=0;j<inter.length;j++) view.setInt16(44+j*2,inter[j],true);
+    return URL.createObjectURL(new Blob([new DataView(ab)],{type:'audio/wav'}));
+  }
+  function buildReversedBuffer(){
+    if(!originalBuffer) return null;
+    const ch=originalBuffer.numberOfChannels,len=originalBuffer.length,sr=originalBuffer.sampleRate;
+    const out=audioCtx.createBuffer(ch,len,sr);
+    for(let c=0;c<ch;c++){ const s=originalBuffer.getChannelData(c), d=out.getChannelData(c); for(let i=0;i<len;i++){ d[i]=s[len-1-i]; } }
+    return out;
+  }
+  reverseBtn.addEventListener('click', ()=>{
+    if(!originalBuffer) return alert('Upload audio first');
+    if(!reversedURL) reversedURL=buildReversedURL();
+    reversed=!reversed; reverseBtn.dataset.active=String(reversed);
+    const wasPlaying=!player.paused; player.pause();
+    player.src=reversed?reversedURL:originalURL; player.load();
+    if(wasPlaying) player.play();
+  });
 
-  reverseBtn.addEventListener('click', ()=>{ if(!originalBuffer) return alert('Upload audio first'); if(!reversedURL) reversedURL = buildReversedURL(); reversed=!reversed; reverseBtn.dataset.active=String(reversed); const wasPlaying=!player.paused; player.pause(); player.src=reversed?reversedURL:originalURL; player.load(); if(wasPlaying) player.play(); });
+  effWrap.addEventListener('click', e=>{
+    const btn=e.target.closest('button[data-effect]'); if(!btn) return;
+    const name=btn.dataset.effect; effect[name]=!effect[name];
+    btn.dataset.active=String(effect[name]);
+    toggleGlitch(name==='glitch' && effect[name]);
+    rebuildGraph();
+  });
 
-  // Effects toggles
-  effWrap.addEventListener('click', e=>{ const btn=e.target.closest('button[data-effect]'); if(!btn) return; const name=btn.dataset.effect; effect[name]=!effect[name]; btn.dataset.active=String(effect[name]); toggleGlitch(name==='glitch' && effect[name]); rebuildGraph(); });
-
-  // Presets
   function applyPreset(name){
     effect.distortion=false; effect.echo=false; effect.crush=false; effect.glitch=false;
-    let f=1200, p=1, v=1;
-    if(name==='CHARRED'){ effect.distortion=true; effect.crush=true; f=900; p=0.95; v=1.0; }
-    else if(name==='BAKED'){ effect.distortion=true; effect.echo=true; f=1400; p=1.05; v=1.0; }
-    else if(name==='FRIED'){ effect.echo=true; effect.glitch=true; effect.crush=true; f=1100; p=1.0; v=1.0; }
+    let f=1200,p=1,v=1;
+    if(name==='CHARRED'){ effect.distortion=true; effect.crush=true; f=900; p=.95; v=1; }
+    else if(name==='BAKED'){ effect.distortion=true; effect.echo=true; f=1400; p=1.05; v=1; }
+    else if(name==='FRIED'){ effect.echo=true; effect.glitch=true; effect.crush=true; f=1100; p=1.0; v=1; }
     [...effWrap.querySelectorAll('button[data-effect]')].forEach(b=>{ const n=b.dataset.effect; b.dataset.active=String(effect[n]); });
     freq.value=f; freq.dispatchEvent(new Event('input'));
     pitch.value=p; pitch.dispatchEvent(new Event('input'));
@@ -420,22 +500,21 @@
     toggleGlitch(effect.glitch);
     rebuildGraph();
   }
-  if (presetsRow) presetsRow.addEventListener('click', (e)=>{ const b=e.target.closest('button[data-preset]'); if(!b) return; applyPreset(b.dataset.preset); });
+  if(presetsRow) presetsRow.addEventListener('click', e=>{
+    const b=e.target.closest('button[data-preset]'); if(!b) return; applyPreset(b.dataset.preset);
+  });
 
-  // Reverb preset change
-  if (reverbPresetSel){
+  if(reverbPresetSel){
     reverbPresetSel.addEventListener('change', ()=>{
-      const key = reverbPresetSel.value;
-      effect.reverb = key !== 'off';
+      const key=reverbPresetSel.value; effect.reverb = key!=='off';
       if(effect.reverb){ loadIR(key).then(rebuildGraph); } else { rebuildGraph(); }
     });
   }
 
-  // Reset
   function resetAll(){
     reversed=false; reverseBtn.dataset.active='false'; if(originalURL){ player.src=originalURL; player.load(); }
     effect.distortion=false; effect.echo=false; effect.crush=false; effect.glitch=false; effect.reverb=false; toggleGlitch(false);
-    if (reverbPresetSel) reverbPresetSel.value='off'; loadedIRBuffer=null;
+    if(reverbPresetSel) reverbPresetSel.value='off'; loadedIRBuffer=null;
     [...effWrap.querySelectorAll('button[data-effect]')].forEach(b=>b.dataset.active='false');
     freq.value=1200; freqOut.textContent='1200Hz'; if(filter) filter.frequency.value=1200;
     pitch.value=1; pitchOut.textContent='1.00×'; player.playbackRate=1;
@@ -443,14 +522,12 @@
     seek.value=0; curT.textContent='0:00'; durT.textContent='0:00';
     rebuildGraph();
   }
-  if (resetBtn) resetBtn.addEventListener('click', resetAll);
+  if(resetBtn) resetBtn.addEventListener('click', resetAll);
 
-  // Sliders
   freq.addEventListener('input', ()=>{ freqOut.textContent=`${Math.round(freq.value)}Hz`; if(filter) filter.frequency.value=+freq.value; });
   pitch.addEventListener('input', ()=>{ pitchOut.textContent=`${dec2(pitch.value)}×`; player.playbackRate=+pitch.value; });
   vol.addEventListener('input', ()=>{ volOut.textContent=dec2(vol.value); if(gain) gain.gain.value=+vol.value; });
 
-  // Player
   playBtn.addEventListener('click', ()=>{ if(!player.src && !micStream) return; ensureContext(); if(player.paused){ player.play(); } else { player.pause(); } });
   player.addEventListener('play', ()=>{ playBtn.textContent='⏸'; });
   player.addEventListener('pause', ()=>{ playBtn.textContent='▶'; });
@@ -458,73 +535,78 @@
   player.addEventListener('loadedmetadata', ()=>{ durT.textContent=fmt(player.duration); });
   seek.addEventListener('input', ()=>{ if(!isNaN(player.duration)){ player.currentTime=(seek.value/1000)*player.duration; }});
 
-  // Mic
   function startMic(){
     ensureContext();
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ alert('Microphone not supported'); return; }
     navigator.mediaDevices.getUserMedia({audio:true})
-      .then(stream=>{ micStream = stream; micSource = audioCtx.createMediaStreamSource(stream); source = micSource; rebuildGraph(); micBtn.dataset.active='true'; micBtn.textContent='🎙️ Mic On'; try{ player.pause(); }catch(e){} })
+      .then(stream=>{ micStream=stream; micSource=audioCtx.createMediaStreamSource(stream); source=micSource; rebuildGraph(); micBtn.dataset.active='true'; micBtn.textContent='🎙️ Mic On'; try{ player.pause(); }catch(e){} })
       .catch(()=>{ alert('Microphone permission denied'); });
   }
-  function stopMic(){ if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; } micSource=null; if (playerSource){ source = playerSource; rebuildGraph(); } micBtn.dataset.active='false'; micBtn.textContent='🎙️ Use Mic'; }
+  function stopMic(){ if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; } micSource=null; if(playerSource){ source=playerSource; rebuildGraph(); } micBtn.dataset.active='false'; micBtn.textContent='🎙️ Use Mic'; }
   micBtn.addEventListener('click', ()=>{ micStream ? stopMic() : startMic(); });
 
-  // Record post-FX
   recordBtn.addEventListener('click', ()=>{
     ensureContext();
     if(!recorder || recorder.state==='inactive'){
-      try{ recorder = new MediaRecorder(nodes.streamDest.stream); }catch(err){ alert('Recording not supported in this browser.'); return; }
+      try{ recorder=new MediaRecorder(nodes.streamDest.stream); }catch(err){ alert('Recording not supported in this browser.'); return; }
       recordChunks=[];
-      recorder.ondataavailable = e=>{ if(e.data.size>0) recordChunks.push(e.data); };
-      recorder.onstop = ()=>{ const blob = new Blob(recordChunks, { type: recorder.mimeType || 'audio/webm' }); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='radiofried_recording.webm'; a.click(); recordBtn.dataset.recording='false'; recordBtn.textContent='● Rec'; };
+      recorder.ondataavailable=e=>{ if(e.data.size>0) recordChunks.push(e.data); };
+      recorder.onstop=()=>{ const blob=new Blob(recordChunks,{type:recorder.mimeType||'audio/webm'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='radiofried_recording.webm'; a.click(); recordBtn.dataset.recording='false'; recordBtn.textContent='● Rec'; };
       recorder.start(); recordBtn.dataset.recording='true'; recordBtn.textContent='■ Stop';
-    } else { recorder.stop(); }
+    }else{ recorder.stop(); }
   });
 
-  // Export (offline render) — bakes effects
   exportBtn.addEventListener('click', ()=>{
     if(!originalBuffer) return alert('Upload audio first');
     ensureContext();
-    const srcBuf = reversed ? buildReversedBuffer() : originalBuffer;
-    const ch = srcBuf.numberOfChannels, sr = srcBuf.sampleRate, frames = Math.ceil(srcBuf.length/Math.max(0.0001,+pitch.value));
-    const off = new OfflineAudioContext(ch, frames, sr);
-    const bs = off.createBufferSource(); bs.buffer = srcBuf; bs.playbackRate.value = +pitch.value;
-    const ofilter = off.createBiquadFilter(); ofilter.type='bandpass'; ofilter.frequency.value = +freq.value;
-    const ogain = off.createGain(); ogain.gain.value = +vol.value;
-    const odist = off.createWaveShaper(); if (effect.distortion) { const n=44100, curve=new Float32Array(n); for(let i=0;i<n;i++){ const x=i*2/n-1; curve[i]=Math.tanh(76*x)/Math.tanh(76); } odist.curve = curve; }
-    const opost = off.createBiquadFilter(); opost.type='bandpass'; opost.frequency.value=1000; opost.Q.value=1.5;
-    const odg = off.createGain(); odg.gain.value=.4;
-    const odelay = off.createDelay(); odelay.delayTime.value = .25; const ofb = off.createGain(); ofb.gain.value = .3; odelay.connect(ofb); ofb.connect(odelay);
-    const obit = off.createBiquadFilter(); obit.type='highshelf'; obit.frequency.value=8000; obit.gain.value = effect.crush ? -40 : 0;
-    const oglitch = off.createGain(); oglitch.gain.value = 1; if (effect.glitch) { let t=0; const step=0.03; while(t<(frames/sr)){ oglitch.gain.setValueAtTime(Math.random()>.5?1:0, t); t+=step; } }
-    let last = bs; last.connect(ofilter); last = ofilter; if (effect.distortion){ last.connect(odist); odist.connect(opost); opost.connect(odg); last = odg; } if (effect.echo){ last.connect(odelay); last = odelay; } if (effect.crush){ last.connect(obit); last = obit; } if (effect.glitch){ last.connect(oglitch); last = oglitch; } // add reverb in offline render
+    const srcBuf=reversed?buildReversedBuffer():originalBuffer;
+    const ch=srcBuf.numberOfChannels, sr=srcBuf.sampleRate, frames=Math.ceil(srcBuf.length/Math.max(0.0001,+pitch.value));
+    const off=new OfflineAudioContext(ch,frames,sr);
+    const bs=off.createBufferSource(); bs.buffer=srcBuf; bs.playbackRate.value=+pitch.value;
+    const ofilter=off.createBiquadFilter(); ofilter.type='bandpass'; ofilter.frequency.value=+freq.value;
+    const ogain=off.createGain(); ogain.gain.value=+vol.value;
+    const odist=off.createWaveShaper(); if(effect.distortion){ const n=44100,curve=new Float32Array(n); for(let i=0;i<n;i++){ const x=i*2/n-1; curve[i]=Math.tanh(76*x)/Math.tanh(76); } odist.curve=curve; }
+    const opost=off.createBiquadFilter(); opost.type='bandpass'; opost.Q.value=1.5; opost.frequency.value=1000;
+    const odg=off.createGain(); odg.gain.value=.4;
+    const odelay=off.createDelay(); odelay.delayTime.value=.25; const ofb=off.createGain(); ofb.gain.value=.3; odelay.connect(ofb); ofb.connect(odelay);
+    const obit=off.createBiquadFilter(); obit.type='highshelf'; obit.frequency.value=8000; obit.gain.value=effect.crush?-40:0;
+    const oglitch=off.createGain(); oglitch.gain.value=1; if(effect.glitch){ let t=0; const step=.03; while(t<(frames/sr)){ oglitch.gain.setValueAtTime(Math.random()>.5?1:0,t); t+=step; } }
+    let last=bs; last.connect(ofilter); last=ofilter;
+    if(effect.distortion){ last.connect(odist); odist.connect(opost); opost.connect(odg); last=odg; }
+    if(effect.echo){ last.connect(odelay); last=odelay; }
+    if(effect.crush){ last.connect(obit); last=obit; }
+    if(effect.glitch){ last.connect(oglitch); last=oglitch; }
     if(effect.reverb && loadedIRBuffer){
-      const oconv = off.createConvolver(); oconv.buffer = loadedIRBuffer;
-      const oWet = off.createGain(); oWet.gain.value = reverbWet;
-      const oDry = off.createGain(); oDry.gain.value = 1 - reverbWet;
+      const oconv=off.createConvolver(); oconv.buffer=loadedIRBuffer;
+      const oWet=off.createGain(); oWet.gain.value=reverbWet;
+      const oDry=off.createGain(); oDry.gain.value=1-reverbWet;
       last.connect(oDry); oDry.connect(ogain);
       last.connect(oconv); oconv.connect(oWet); oWet.connect(ogain);
-    } else {
-      last.connect(ogain);
-    }
-    ogain.connect(off.destination);
-    bs.start();
+    }else{ last.connect(ogain); }
+    ogain.connect(off.destination); bs.start();
     off.startRendering()
-      .then(rendered => { const ab = bufferToWav(rendered); const blob = new Blob([new DataView(ab)], { type:'audio/wav' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'radiofried_export.wav'; a.click(); })
-      .catch(err => { console.error(err); alert('Render failed'); });
+      .then(rendered=>{ const ab=bufferToWav(rendered); const blob=new Blob([new DataView(ab)],{type:'audio/wav'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='radiofried_export.wav'; a.click(); })
+      .catch(err=>{ console.error(err); alert('Render failed'); });
   });
 
-  function bufferToWav(buf){ const ch=buf.numberOfChannels, sr=buf.sampleRate; const len=buf.length*ch*2; const out=new ArrayBuffer(44+len); const view=new DataView(out); let o=0; const ws=s=>{ for(let i=0;i<s.length;i++) view.setUint8(o+i, s.charCodeAt(i)); o+=s.length; }; ws('RIFF'); view.setUint32(o,36+len,true); o+=4; ws('WAVE'); ws('fmt '); view.setUint32(o,16,true); o+=4; view.setUint16(o,1,true); o+=2; view.setUint16(o,ch,true); o+=2; view.setUint32(o,sr,true); o+=4; view.setUint32(o,sr*ch*2,true); o+=4; view.setUint16(o,ch*2,true); o+=2; view.setUint16(o,16,true); o+=2; ws('data'); view.setUint32(o,len,true); o+=4; const inter=new Int16Array(len/2); let i=0; for(let s=0;s<buf.length;s++){ for(let c=0;c<ch;c++){ let v=buf.getChannelData(c)[s]*0x7FFF; v=Math.max(-32768,Math.min(32767,v)); inter[i++]=v; } } for(let j=0;j<inter.length;j++) view.setInt16(44+j*2, inter[j], true); return out; }
+  function bufferToWav(buf){
+    const ch=buf.numberOfChannels, sr=buf.sampleRate; const len=buf.length*ch*2; const out=new ArrayBuffer(44+len); const view=new DataView(out); let o=0;
+    const ws=s=>{ for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); o+=s.length; };
+    ws('RIFF'); view.setUint32(o,36+len,true); o+=4; ws('WAVE'); ws('fmt '); view.setUint32(o,16,true); o+=4;
+    view.setUint16(o,1,true); o+=2; view.setUint16(o,ch,true); o+=2; view.setUint32(o,sr,true); o+=4;
+    view.setUint32(o,sr*ch*2,true); o+=4; view.setUint16(o,ch*2,true); o+=2; view.setUint16(o,16,true); o+=2;
+    ws('data'); view.setUint32(o,len,true); o+=4; const inter=new Int16Array(len/2); let i=0;
+    for(let s=0;s<buf.length;s++){ for(let c=0;c<ch;c++){ let v=buf.getChannelData(c)[s]*0x7FFF; v=Math.max(-32768,Math.min(32767,v)); inter[i++]=v; } }
+    for(let j=0;j<inter.length;j++) view.setInt16(44+j*2,inter[j],true);
+    return out;
+  }
 
-  // Init
   window.addEventListener('resize', setCanvasSize, {passive:true});
-  setCanvasSize();
-  ensureContext();
-  requestAnimationFrame(visualize);
+  setCanvasSize(); ensureContext(); requestAnimationFrame(visualize);
 
-  // Help popup
-  if (helpBtn && howto){ helpBtn.addEventListener('click', ()=>{ howto.classList.toggle('show'); }); }
-  if (howtoClose){ howtoClose.addEventListener('click', ()=> howto.classList.remove('show')); }
+  /* Help popup */
+  helpBtn.addEventListener('click', ()=> howto.classList.toggle('show'));
+  howtoClose.addEventListener('click', ()=> howto.classList.remove('show'));
 })();
 </script>
 </body>
