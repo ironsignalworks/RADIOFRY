@@ -5,18 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>RADIOFRY — Fry your audio. Export a WAV.</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <!-- Canonical + SEO -->
+  <link rel="canonical" href="https://ironsignalworks.com/radiofry" />
+  <meta name="description" content="RADIOFRY — browser-based audio degrader & field-recording tool. Distortion, echo, crush, glitch, reverb, reverse, mic record, and baked WAV export — all local." />
 
-  <!-- Open Graph / Twitter cards (uses your local image) -->
+  <!-- Open Graph / Twitter cards -->
   <meta property="og:title" content="RADIOFRY — Fry your audio. Export a WAV." />
-  <meta property="og:description" content="Browser-based audio degrader and field-recording tool. Distortion, echo, crush, glitch, reverb, reverse, mic record, and baked WAV export — all local." />
+  <meta property="og:description" content="Degrade, distort, and export: distortion, echo, crush, glitch, reverb, reverse, mic record, and baked WAV export — all local." />
   <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://ironsignalworks.com/radiofry" />
   <meta property="og:image" content="isw2_logo.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="RADIOFRY — Fry your audio. Export a WAV." />
-  <meta name="twitter:description" content="Browser-based audio degrader and field-recording tool. Distortion, echo, crush, glitch, reverb, reverse, mic record, and baked WAV export — all local." />
+  <meta name="twitter:description" content="Degrade, distort, and export — all in the browser, no tracking." />
   <meta name="twitter:image" content="isw2_logo.png" />
+
+  <!-- WebApplication Schema (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebApplication",
+    "name":"RADIOFRY",
+    "url":"https://ironsignalworks.com/radiofry",
+    "applicationCategory":"MultimediaApplication",
+    "operatingSystem":"Any",
+    "description":"Browser-based audio degrader and field-recording tool with WAV export.",
+    "creator":{"@type":"Organization","name":"Iron Signal Works"}
+  }
+  </script>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
   <style>
     :root{
@@ -24,6 +43,7 @@
       --win-gray:#c0c0c0; --win-dark:#808080; --win-darker:#404040; --win-light:#dfdfdf; --win-white:#ffffff; --win-blue:#000080; --ink:#000000;
       --accent:#00ff66;
       --gap:8px; --btn-h:40px;
+      --border-focus:#22c55e;
     }
     *{box-sizing:border-box}
 
@@ -51,6 +71,8 @@
     /* Title bar */
     header.titlebar{display:flex; align-items:center; justify-content:space-between; background:var(--win-blue); color:#fff; padding:4px 6px}
     .brand{display:flex; align-items:center; gap:8px}
+    .brand a{display:flex; align-items:center; gap:8px; color:#b8ffcc; text-decoration:none}
+    .brand a:focus{outline:2px solid var(--border-focus); outline-offset:2px; border-radius:4px}
     .brand .title{font-weight:700; letter-spacing:.4px}
     .window-controls{display:flex; gap:6px; align-items:center}
 
@@ -68,6 +90,7 @@
     }
     .btn.bevel-out{border:2px solid var(--win-white); border-right-color:var(--win-darker); border-bottom-color:var(--win-darker)}
     .btn[data-active="true"]{background:#ffe28a}
+    .btn:focus{outline:2px solid var(--border-focus); outline-offset:2px}
 
     #presets{display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap)}
     #presets .btn{width:100%}
@@ -114,6 +137,7 @@
     .howto .body{font-size:.95rem; line-height:1.35}
     .howto .body li{margin:6px 0}
     .lede{margin:0 0 6px 0; opacity:.95}
+    .howto:focus{outline:2px solid var(--border-focus); outline-offset:2px}
 
     /* ------- SKINS ------- */
 
@@ -151,6 +175,11 @@
     .skin-office .bevel-out{border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.18)}
     .skin-office .btn{border-radius:6px}
 
+    /* Accessibility / reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none!important; transition:none!important}
+    }
+
     /* Mobile: allow scroll, no scaling */
     @media (max-width:900px){
       :root{ --btn-h:36px }
@@ -163,27 +192,30 @@
   </style>
 </head>
 <body>
-  <div class="app bevel" id="app">
+  <div class="app bevel" id="app" role="application" aria-label="RADIOFRY interface">
     <header class="titlebar">
       <div class="brand">
-        <!-- Tiny radio avatar -->
-        <svg class="avatar" width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <path d="M2 6h18v7H2zM4 5l12-4M5 10h6M6 8h8M16 9v3M4 9v3" stroke="var(--accent)" stroke-width="2"/>
-        </svg>
-        <div class="title">RADIOFRY</div>
+        <a href="https://ironsignalworks.com" target="_blank" rel="noopener" aria-label="Visit Iron Signal Works">
+          <!-- Tiny radio avatar -->
+          <svg class="avatar" width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M2 6h18v7H2zM4 5l12-4M5 10h6M6 8h8M16 9v3M4 9v3" stroke="var(--accent)" stroke-width="2"/>
+          </svg>
+          <div class="title">RADIOFRY</div>
+        </a>
       </div>
       <div class="window-controls">
-        <button id="skinBtn" class="btn bevel-out">Skin: Retro 95</button>
-        <button id="helpBtn" class="btn bevel-out">How to Fry</button>
+        <button id="shareBtn" class="btn bevel-out" aria-label="Share this setup">Share</button>
+        <button id="skinBtn" class="btn bevel-out" aria-label="Change UI skin">Skin: Retro 95</button>
+        <button id="helpBtn" class="btn bevel-out" aria-haspopup="dialog" aria-controls="howto">How to Fry</button>
       </div>
     </header>
 
     <main>
       <!-- Left: controls -->
-      <aside class="panel bevel">
+      <aside class="panel bevel" aria-label="Controls">
         <div class="group">
-          <div class="label">Presets</div>
-          <div id="presets">
+          <div class="label" id="presetsLabel">Presets</div>
+          <div id="presets" role="group" aria-labelledby="presetsLabel">
             <button class="btn bevel-out" data-preset="CHARRED">CHARRED</button>
             <button class="btn bevel-out" data-preset="BAKED">BAKED</button>
             <button class="btn bevel-out" data-preset="FRIED">FRIED</button>
@@ -192,17 +224,16 @@
         </div>
 
         <div class="group">
-          <div class="label">Effects</div>
-          <div class="grid-2" id="effects">
-            <button class="btn bevel-out" data-effect="distortion">Distortion</button>
-            <button class="btn bevel-out" data-effect="echo">Echo</button>
-            <button class="btn bevel-out" data-effect="crush">Crush</button>
-            <button class="btn bevel-out" data-effect="glitch">Glitch</button>
+          <div class="label" id="effectsLabel">Effects</div>
+          <div class="grid-2" id="effects" role="group" aria-labelledby="effectsLabel">
+            <button class="btn bevel-out" data-effect="distortion" aria-pressed="false">Distortion</button>
+            <button class="btn bevel-out" data-effect="echo" aria-pressed="false">Echo</button>
+            <button class="btn bevel-out" data-effect="crush" aria-pressed="false">Crush</button>
+            <button class="btn bevel-out" data-effect="glitch" aria-pressed="false">Glitch</button>
           </div>
 
-          <label class="slider" style="grid-template-columns:120px 1fr; align-items:center">
-            <span>Reverb Preset</span>
-            <select id="reverbPreset" class="btn bevel-out" style="height:26px">
+          <label class="slider"><span id="revLabel">Reverb Preset</span>
+            <select id="reverbPreset" class="btn bevel-out" aria-labelledby="revLabel" style="height:26px">
               <option value="off">Off</option>
               <option value="small-room">Small Room</option>
               <option value="cathedral">Cathedral Room</option>
@@ -215,48 +246,65 @@
         </div>
 
         <div class="group">
-          <label class="slider"><span>Filter Freq</span> <input id="freq" type="range" min="200" max="4000" step="10" value="1200"/> <output id="freqOut">1200Hz</output></label>
-          <label class="slider"><span>Pitch (Speed)</span> <input id="pitch" type="range" min="0.5" max="1.5" step="0.01" value="1"/> <output id="pitchOut">1.00×</output></label>
-          <label class="slider"><span>Volume</span> <input id="vol" type="range" min="0" max="2" step="0.01" value="1"/> <output id="volOut">1.00</output></label>
+          <label class="slider"><span id="freqLabel">Filter Freq</span>
+            <input id="freq" type="range" min="200" max="4000" step="10" value="1200" aria-labelledby="freqLabel"/>
+            <output id="freqOut" aria-live="polite">1200Hz</output></label>
 
-          <!-- Four full-width stacked buttons -->
-          <button id="reverse" class="btn bevel-out" style="width:100%">↺ Reverse</button>
+          <label class="slider"><span id="pitchLabel">Pitch (Speed)</span>
+            <input id="pitch" type="range" min="0.5" max="1.5" step="0.01" value="1" aria-labelledby="pitchLabel"/>
+            <output id="pitchOut" aria-live="polite">1.00×</output></label>
+
+          <label class="slider"><span id="volLabel">Volume</span>
+            <input id="vol" type="range" min="0" max="2" step="0.01" value="1" aria-labelledby="volLabel"/>
+            <output id="volOut" aria-live="polite">1.00</output></label>
+
+          <!-- Full-width stacked buttons -->
+          <button id="reverse" class="btn bevel-out" style="width:100%" aria-pressed="false">↺ Reverse</button>
           <button id="record"  class="btn bevel-out" style="width:100%">● Rec</button>
-          <button id="micBtn"  class="btn bevel-out" style="width:100%">🎙️ Use Mic</button>
+          <button id="micBtn"  class="btn bevel-out" style="width:100%" aria-pressed="false">🎙️ Use Mic</button>
           <button id="export"  class="btn bevel-out" style="width:100%">Export WAV</button>
         </div>
       </aside>
 
       <!-- Right: stage -->
-      <section class="stage">
+      <section class="stage" aria-label="Stage">
         <div class="topbar bevel">
           <div class="controls">
-            <input type="file" id="file" accept="audio/*"/>
+            <input type="file" id="file" accept="audio/*" aria-label="Choose audio file"/>
             <label for="file" class="btn bevel-out filebtn" id="fileBtn">📁 Choose File</label>
-            <span class="filename" id="fileName">No file chosen</span>
+            <span class="filename" id="fileName" aria-live="polite">No file chosen</span>
           </div>
         </div>
 
-        <canvas id="visualizer" class="bevel"></canvas>
+        <canvas id="visualizer" class="bevel" role="img" aria-label="Audio waveform"></canvas>
 
-        <div class="player bevel">
-          <button id="play" class="btn sq bevel-out">▶</button>
-          <span id="curT" class="time">0:00</span>
-          <input id="seek" type="range" min="0" max="1000" value="0"/>
-          <span id="durT" class="time">0:00</span>
+        <div class="player bevel" aria-label="Transport">
+          <button id="play" class="btn sq bevel-out" aria-label="Play/Pause">▶</button>
+          <span id="curT" class="time" aria-live="polite">0:00</span>
+          <input id="seek" type="range" min="0" max="1000" value="0" aria-label="Seek"/>
+          <span id="durT" class="time" aria-live="polite">0:00</span>
         </div>
 
         <audio id="player" preload="metadata" hidden></audio>
       </section>
     </main>
 
-    <footer class="pane bevel">No tracking. Local only.</footer>
+    <footer class="pane bevel" aria-label="Footer">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 8px;">
+        <span>No tracking. Local only.</span>
+        <span>
+			 Built by
+          <a href="https://ironsignalworks.com" target="_blank" rel="noopener">Iron Signal Works</a> —
+          <a href="https://ironsignalworks.com#hire" target="_blank" rel="noopener" aria-label="Hire Iron Signal Works">Hire us →</a>
+        </span>
+      </div>
+    </footer>
 
     <!-- Popup: How to Fry -->
-    <div id="howto" class="howto bevel">
+    <div id="howto" class="howto bevel" role="dialog" aria-modal="true" aria-labelledby="howtoTitle">
       <header>
-        <span>How to Fry — Quick Guide</span>
-        <button id="howtoClose" class="btn bevel-out">✕</button>
+        <span id="howtoTitle">How to Fry — Quick Guide</span>
+        <button id="howtoClose" class="btn bevel-out" aria-label="Close help">✕</button>
       </header>
       <div class="body">
         <p class="lede"><b>RADIOFRY</b> is a browser-based <b>audio degrader</b> and <b>field-recording tool</b>. Drop a file or capture from your mic, mangle with lo-fi effects, then export a baked WAV — all local, no tracking.</p>
@@ -267,7 +315,8 @@
           <li><b>Shape</b>: Adjust <b>Filter Freq</b>, <b>Pitch (Speed)</b>, and <b>Volume</b>.</li>
           <li><b>Reverse</b>: Flip your audio backwards for instant tape-style effects.</li>
           <li><b>● Rec</b>: Record exactly what you hear (post-FX) to a WEBM.</li>
-          <li><b>Export WAV</b>: Bake the full chain offline and download a WAV.</li>
+          <li><b>Export WAV</b>: Bakes the full chain offline and downloads a WAV with an Iron Signal Works signature in metadata.</li>
+          <li><b>Share</b>: Copies a URL that reloads your setup — with UTM tags for analytics.</li>
         </ol>
       </div>
     </div>
@@ -328,6 +377,7 @@
       const curT = document.getElementById('curT');
       const durT = document.getElementById('durT');
       const resetBtn = document.getElementById('reset');
+      const shareBtn = document.getElementById('shareBtn');
 
       /* ---------- Skins ---------- */
       const skins = ['classic','darkops','office'];
@@ -481,6 +531,7 @@
         for(let c=0;c<ch;c++){ const src=originalBuffer.getChannelData(c), dst=outBuf.getChannelData(c); for(let i=0;i<len;i++){ dst[i]=src[len-1-i]; } }
         const total=len*ch*2; const ab=new ArrayBuffer(44+total); const view=new DataView(ab); let o=0;
         const ws=s=>{ for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); o+=s.length; };
+        // WAV header
         ws('RIFF'); view.setUint32(o,36+total,true); o+=4; ws('WAVE'); ws('fmt '); view.setUint32(o,16,true); o+=4;
         view.setUint16(o,1,true); o+=2; view.setUint16(o,ch,true); o+=2; view.setUint32(o,sr,true); o+=4; view.setUint32(o,sr*ch*2,true); o+=4; view.setUint16(o,ch*2,true); o+=2; view.setUint16(o,16,true); o+=2;
         ws('data'); view.setUint32(o,total,true); o+=4; const inter=new Int16Array(total/2); let idx=0;
@@ -499,6 +550,7 @@
         if(!originalBuffer) return alert('Upload audio first');
         if(!reversedURL) reversedURL=buildReversedURL();
         reversed=!reversed; reverseBtn.dataset.active=String(reversed);
+        reverseBtn.setAttribute('aria-pressed', String(reversed));
         const wasPlaying=!player.paused; player.pause();
         player.src=reversed?reversedURL:originalURL; player.load();
         if(wasPlaying) player.play();
@@ -506,8 +558,10 @@
 
       effWrap.addEventListener('click', e=>{
         const btn=e.target.closest('button[data-effect]'); if(!btn) return;
-        const name=btn.dataset.effect; effect[name]=!effect[name];
-        btn.dataset.active=String(effect[name]);
+        const name=btn.dataset.effect; const state = !(btn.dataset.active==='true');
+        btn.dataset.active=String(state);
+        btn.setAttribute('aria-pressed', String(state));
+        effect[name]=state;
         toggleGlitch(name==='glitch' && effect[name]);
         rebuildGraph();
       });
@@ -518,7 +572,7 @@
         if(name==='CHARRED'){ effect.distortion=true; effect.crush=true; f=900; p=.95; v=1; }
         else if(name==='BAKED'){ effect.distortion=true; effect.echo=true; f=1400; p=1.05; v=1; }
         else if(name==='FRIED'){ effect.echo=true; effect.glitch=true; effect.crush=true; f=1100; p=1.0; v=1; }
-        [...effWrap.querySelectorAll('button[data-effect]')].forEach(b=>{ const n=b.dataset.effect; b.dataset.active=String(effect[n]); });
+        [...effWrap.querySelectorAll('button[data-effect]')].forEach(b=>{ const n=b.dataset.effect; b.dataset.active=String(effect[n]); b.setAttribute('aria-pressed', String(effect[n])); });
         freq.value=f; freq.dispatchEvent(new Event('input'));
         pitch.value=p; pitch.dispatchEvent(new Event('input'));
         vol.value=v; vol.dispatchEvent(new Event('input'));
@@ -537,10 +591,10 @@
       }
 
       function resetAll(){
-        reversed=false; reverseBtn.dataset.active='false'; if(originalURL){ player.src=originalURL; player.load(); }
+        reversed=false; reverseBtn.dataset.active='false'; reverseBtn.setAttribute('aria-pressed','false'); if(originalURL){ player.src=originalURL; player.load(); }
         effect.distortion=false; effect.echo=false; effect.crush=false; effect.glitch=false; effect.reverb=false; toggleGlitch(false);
         if(reverbPresetSel) reverbPresetSel.value='off'; loadedIRBuffer=null;
-        [...effWrap.querySelectorAll('button[data-effect]')].forEach(b=>b.dataset.active='false');
+        [...effWrap.querySelectorAll('button[data-effect]')].forEach(b=>{ b.dataset.active='false'; b.setAttribute('aria-pressed','false'); });
         freq.value=1200; freqOut.textContent='1200Hz'; if(filter) filter.frequency.value=1200;
         pitch.value=1; pitchOut.textContent='1.00×'; player.playbackRate=1;
         vol.value=1; volOut.textContent='1.00'; if(gain) gain.gain.value=1;
@@ -564,23 +618,13 @@
         ensureContext();
         if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){ alert('Microphone not supported'); return; }
         navigator.mediaDevices.getUserMedia({audio:true})
-          .then(stream=>{ micStream=stream; micSource=audioCtx.createMediaStreamSource(stream); source=micSource; rebuildGraph(); micBtn.dataset.active='true'; micBtn.textContent='🎙️ Mic On'; try{ player.pause(); }catch(e){} })
+          .then(stream=>{ micStream=stream; micSource=audioCtx.createMediaStreamSource(stream); source=micSource; rebuildGraph(); micBtn.dataset.active='true'; micBtn.textContent='🎙️ Mic On'; micBtn.setAttribute('aria-pressed','true'); try{ player.pause(); }catch(e){} })
           .catch(()=>{ alert('Microphone permission denied'); });
       }
-      function stopMic(){ if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; } micSource=null; if(playerSource){ source=playerSource; rebuildGraph(); } micBtn.dataset.active='false'; micBtn.textContent='🎙️ Use Mic'; }
+      function stopMic(){ if(micStream){ micStream.getTracks().forEach(t=>t.stop()); micStream=null; } micSource=null; if(playerSource){ source=playerSource; rebuildGraph(); } micBtn.dataset.active='false'; micBtn.textContent='🎙️ Use Mic'; micBtn.setAttribute('aria-pressed','false'); }
       micBtn.addEventListener('click', ()=>{ micStream ? stopMic() : startMic(); });
 
-      recordBtn.addEventListener('click', ()=>{
-        ensureContext();
-        if(!recorder || recorder.state==='inactive'){
-          try{ recorder=new MediaRecorder(nodes.streamDest.stream); }catch(err){ alert('Recording not supported in this browser.'); return; }
-          recordChunks=[];
-          recorder.ondataavailable=e=>{ if(e.data.size>0) recordChunks.push(e.data); };
-          recorder.onstop=()=>{ const blob=new Blob(recordChunks,{type:recorder.mimeType||'audio/webm'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='radiofry_recording.webm'; a.click(); recordBtn.dataset.recording='false'; recordBtn.textContent='● Rec'; };
-          recorder.start(); recordBtn.dataset.recording='true'; recordBtn.textContent='■ Stop';
-        }else{ recorder.stop(); }
-      });
-
+      /* ---------- WAV EXPORT with ISW Signature (RIFF INFO) ---------- */
       exportBtn.addEventListener('click', ()=>{
         if(!originalBuffer) return alert('Upload audio first');
         ensureContext();
@@ -610,20 +654,74 @@
         }else{ last.connect(ogain); }
         ogain.connect(off.destination); bs.start();
         off.startRendering()
-          .then(rendered=>{ const ab=bufferToWav(rendered); const blob=new Blob([new DataView(ab)],{type:'audio/wav'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='radiofry_export.wav'; a.click(); })
+          .then(rendered=>{
+            const ab=bufferToWavWithInfo(rendered,
+              'Generated with RADIOFRY // Iron Signal Works — https://ironsignalworks.com');
+            const blob=new Blob([new DataView(ab)],{type:'audio/wav'});
+            const a=document.createElement('a');
+            const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+            a.href=URL.createObjectURL(blob);
+            a.download=`radiofry_export_isw_${stamp}.wav`;
+            a.click();
+          })
           .catch(err=>{ console.error(err); alert('Render failed'); });
       });
 
-      function bufferToWav(buf){
-        const ch=buf.numberOfChannels, sr=buf.sampleRate; const len=buf.length*ch*2; const out=new ArrayBuffer(44+len); const view=new DataView(out); let o=0;
+      function bufferToWavWithInfo(buf, comment){
+        const ch=buf.numberOfChannels, sr=buf.sampleRate;
+        const samples=buf.length;
+        const dataLen=samples*ch*2;
+
+        // Build PCM data
+        const pcm = new Int16Array(samples*ch);
+        let i=0;
+        for(let s=0;s<samples;s++){
+          for(let c=0;c<ch;c++){
+            let v=buf.getChannelData(c)[s]*0x7FFF;
+            v=Math.max(-32768,Math.min(32767,v));
+            pcm[i++]=v;
+          }
+        }
+
+        // Build LIST/INFO (ICMT) chunk
+        function pad2(n){ return (n%2) ? n+1 : n; }
+        const txt = new TextEncoder().encode(comment + '\0'); // include null terminator per INFO
+        const icmtSize = 4 + 4 + pad2(txt.length); // 'ICMT' + size + data (padded)
+        const listSize = 4 + 4 + icmtSize; // 'INFO' + subchunks
+        const riffSize = 4 + (8+16) + (8+dataLen) + (8+listSize);
+
+        const ab = new ArrayBuffer(8 + riffSize);
+        const view = new DataView(ab);
+        let o=0;
         const ws=s=>{ for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); o+=s.length; };
-        ws('RIFF'); view.setUint32(o,36+len,true); o+=4; ws('WAVE'); ws('fmt '); view.setUint32(o,16,true); o+=4;
-        view.setUint16(o,1,true); o+=2; view.setUint16(o,ch,true); o+=2; view.setUint32(o,sr,true); o+=4;
-        view.setUint32(o,sr*ch*2,true); o+=4; view.setUint16(o,ch*2,true); o+=2; view.setUint16(o,16,true); o+=2;
-        ws('data'); view.setUint32(o,len,true); o+=4; const inter=new Int16Array(len/2); let i=0;
-        for(let s=0;s<buf.length;s++){ for(let c=0;c<ch;c++){ let v=buf.getChannelData(c)[s]*0x7FFF; v=Math.max(-32768,Math.min(32767,v)); inter[i++]=v; } }
-        for(let j=0;j<inter.length;j++) view.setInt16(44+j*2,inter[j],true);
-        return out;
+
+        // RIFF header
+        ws('RIFF'); view.setUint32(o, riffSize, true); o+=4; ws('WAVE');
+
+        // fmt  chunk
+        ws('fmt '); view.setUint32(o,16,true); o+=4;
+        view.setUint16(o,1,true); o+=2;           // PCM
+        view.setUint16(o,ch,true); o+=2;
+        view.setUint32(o,sr,true); o+=4;
+        view.setUint32(o,sr*ch*2,true); o+=4;     // byte rate
+        view.setUint16(o,ch*2,true); o+=2;        // block align
+        view.setUint16(o,16,true); o+=2;          // bits per sample
+
+        // data chunk
+        ws('data'); view.setUint32(o,dataLen,true); o+=4;
+        for(let j=0;j<pcm.length;j++) view.setInt16(o + j*2, pcm[j], true);
+        o += dataLen;
+        if (dataLen % 2) { view.setUint8(o, 0); o+=1; } // pad
+
+        // LIST INFO chunk with ICMT
+        ws('LIST'); view.setUint32(o, listSize, true); o+=4;
+        ws('INFO');
+
+        // ICMT subchunk
+        ws('ICMT'); view.setUint32(o, txt.length, true); o+=4;
+        new Uint8Array(ab, o, txt.length).set(txt); o += pad2(txt.length);
+
+        return ab;
       }
 
       window.addEventListener('resize', setCanvasSize, {passive:true});
@@ -632,6 +730,56 @@
       /* Help popup */
       helpBtn.addEventListener('click', ()=> howto.classList.toggle('show'));
       howtoClose.addEventListener('click', ()=> howto.classList.remove('show'));
+
+      /* ---------- Share: copy reloadable URL with UTM ---------- */
+      function shareURL(){
+        const base = "https://ironsignalworks.com/radiofry";
+        const p = new URLSearchParams();
+        // capture state
+        p.set('sk', skins[skinIndex]);
+        p.set('fxd', String(effect.distortion));
+        p.set('fxe', String(effect.echo));
+        p.set('fxc', String(effect.crush));
+        p.set('fxg', String(effect.glitch));
+        p.set('rev', String(reverbPresetSel.value||'off'));
+        p.set('fq', String(freq.value));
+        p.set('pt', String(pitch.value));
+        p.set('vl', String(vol.value));
+        p.set('rvd', String(reversed));
+        // UTM
+        p.set('utm_source','radiofry');
+        p.set('utm_medium','share');
+        p.set('utm_campaign','lab-to-site');
+        const url = base + '?' + p.toString();
+        navigator.clipboard.writeText(url).then(()=>{
+          shareBtn.textContent='Copied!';
+          setTimeout(()=> shareBtn.textContent='Share', 1200);
+        });
+      }
+      shareBtn.addEventListener('click', shareURL);
+
+      // Load from params
+      (function initFromParams(){
+        const p = new URLSearchParams(location.search);
+        const sk = p.get('sk'); if(sk){ skinIndex = Math.max(0, ['classic','darkops','office'].indexOf(sk)); applySkin(skins[skinIndex]||'classic'); }
+        const parseBool = v => v === 'true';
+        effect.distortion = parseBool(p.get('fxd'));
+        effect.echo       = parseBool(p.get('fxe'));
+        effect.crush      = parseBool(p.get('fxc'));
+        effect.glitch     = parseBool(p.get('fxg'));
+        const rev = p.get('rev'); if(rev){ reverbPresetSel.value = rev; effect.reverb = rev !== 'off'; if(effect.reverb){ loadIR(rev); } }
+        const fq = p.get('fq');  if(fq){ freq.value = +fq; freqOut.textContent = `${Math.round(fq)}Hz`; }
+        const pt = p.get('pt');  if(pt){ pitch.value = +pt; pitchOut.textContent = Number(pt).toFixed(2)+'×'; }
+        const vl = p.get('vl');  if(vl){ vol.value = +vl; volOut.textContent = Number(vl).toFixed(2); }
+        const rvd = p.get('rvd'); if(rvd){ reversed = parseBool(rvd); reverseBtn.dataset.active=String(reversed); reverseBtn.setAttribute('aria-pressed', String(reversed)); }
+
+        // reflect effect buttons
+        [...effWrap.querySelectorAll('button[data-effect]')].forEach(b=>{
+          const n=b.dataset.effect; b.dataset.active=String(!!effect[n]); b.setAttribute('aria-pressed', String(!!effect[n]));
+        });
+
+        rebuildGraph();
+      })();
     })();
   </script>
 </body>
