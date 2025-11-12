@@ -75,10 +75,9 @@
 
     /* Title bar */
     header.titlebar{display:flex; align-items:center; justify-content:space-between; background:var(--win-blue); color:#fff; padding:4px 6px}
-    .brand{display:flex; align-items:center; gap:8px; padding-left:6px}
+    .brand{display:flex; align-items:center; gap:8px}
     .brand a{display:flex; align-items:center; gap:8px; color:#b8ffcc; text-decoration:none}
     .brand a:focus{outline:2px solid var(--border-focus); outline-offset:2px; border-radius:4px}
-    .brand .favicon{flex-shrink:0; display:block}
     .brand .title{font-weight:700; letter-spacing:.4px}
     .window-controls{display:flex; gap:6px; align-items:center}
 
@@ -132,7 +131,7 @@
     #seek::-webkit-slider-runnable-track{height:10px; background:var(--win-dark)}
     #seek::-moz-range-track{height:10px; background:var(--win-dark)}
     #seek::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:18px;background:var(--win-gray);border:2px solid var(--win-darker);margin-top:-4px}
-    #seek::-moz-range-thumb{width=14px;height=18px;background:var(--win-gray);border:2px solid var(--win-darker)}
+    #seek::-moz-range-thumb{width:14px;height:18px;background:var(--win-gray);border:2px solid var(--win-darker)}
 
     footer{color:var(--ink)}
 
@@ -144,6 +143,17 @@
     .howto .body li{margin:6px 0}
     .lede{margin:0 0 6px 0; opacity:.95}
     .howto:focus{outline:2px solid var(--border-focus); outline-offset:2px}
+
+    /* Export format picker */
+    .export-picker{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(340px, 90vw); background:var(--win-light); padding:12px; z-index:100; display:none; color:var(--ink)}
+    .export-picker.show{display:block}
+    .export-picker header{display:flex; align-items:center; justify-content:space-between; font-weight:700; margin-bottom:8px; font-size:1rem}
+    .export-picker .format-grid{display:grid; grid-template-columns:1fr; gap:8px; margin-top:8px}
+    .export-picker .format-btn{width:100%; padding:10px; text-align:left; display:flex; align-items:center; justify-content:space-between}
+    .export-picker .format-label{font-weight:600}
+    .export-picker .format-desc{font-size:.85rem; opacity:.8}
+    .overlay{position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:99; display:none}
+    .overlay.show{display:block}
 
     /* ------- SKINS ------- */
 
@@ -186,27 +196,14 @@
       *{animation:none!important; transition:none!important}
     }
 
-    /* Pulse animation for highlighting */
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); box-shadow: 0 6px 18px rgba(0,0,0,.18); }
-      50% { transform: scale(1.05); box-shadow: 0 8px 24px rgba(34, 197, 94, 0.4); }
-    }
-
     /* Mobile: allow scroll, no scaling */
     @media (max-width:900px){
       :root{ --btn-h:36px }
-      body{align-items:stretch; justify-content:stretch; padding:0; overflow:auto; background:#c0c0c0}
-      .app{width:100%; height:auto; transform:none; min-height:100dvh}
-      main{grid-template-columns:1fr; padding:4px}
+      body{align-items:stretch; justify-content:stretch; padding-top:8px; overflow:auto}
+      .app{width:100%; height:auto; transform:none}
+      main{grid-template-columns:1fr}
       .stage{grid-template-rows:auto minmax(180px, 45dvh) auto}
       .btn{font-size:.95rem}
-      
-      /* Titlebar and logo on mobile */
-      .brand{margin-right:auto; padding-right:4px; flex-shrink:0}
-      .brand .favicon{width:14px; height:14px}
-      .brand .title{font-size:.9rem}
-      .window-controls{flex-wrap:nowrap; gap:3px; flex-shrink:1; min-width:0}
-      .window-controls .btn{font-size:.7rem; padding:3px 5px; height:28px; white-space:nowrap; min-width:0}
     }
   </style>
 </head>
@@ -215,8 +212,10 @@
     <header class="titlebar">
       <div class="brand">
         <a href="https://ironsignalworks.com" target="_blank" rel="noopener" aria-label="Visit Iron Signal Works">
-          <!-- Favicon before name -->
-          <img src="isw.png" alt="" class="favicon" width="16" height="16" style="image-rendering:pixelated">
+          <!-- Tiny radio avatar -->
+          <svg class="avatar" width="22" height="16" viewBox="0 0 22 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M2 6h18v7H2zM4 5l12-4M5 10h6M6 8h8M16 9v3M4 9v3" stroke="var(--accent)" stroke-width="2"/>
+          </svg>
           <div class="title">RADIOFRY</div>
         </a>
       </div>
@@ -351,10 +350,42 @@
           <li><b>Flavor</b>: Toggle <b>Distortion</b>, <b>Echo</b>, <b>Crush</b>, <b>Glitch</b>. Pick a <b>Reverb Preset</b>.</li>
           <li><b>Shape</b>: Adjust <b>Filter Freq</b>, <b>Pitch (Speed)</b>, and <b>Volume</b>.</li>
           <li><b>Reverse</b>: Flip your audio backwards for instant tape-style effects.</li>
-          <li><b>● Rec</b>: Record exactly what you hear (post-FX) to a WAV.</li>
-          <li><b>Export Audio</b>: Download your processed audio with all effects baked into a WAV file.</li>
+          <li><b>● Rec</b>: Record exactly what you hear (post-FX) to a WEBM.</li>
+          <li><b>Export Audio</b>: Choose format (WAV, MP3, or OGG) and download your processed audio with all effects baked in.</li>
           <li><b>Share</b>: Copies a URL that reloads your setup — with UTM tags for analytics.</li>
         </ol>
+      </div>
+    </div>
+
+    <!-- Export Format Picker -->
+    <div class="overlay" id="exportOverlay"></div>
+    <div id="exportPicker" class="export-picker bevel" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+      <header>
+        <span id="exportTitle">Choose Export Format</span>
+        <button id="exportPickerClose" class="btn bevel-out" aria-label="Close" style="padding:4px 8px; height:auto">✕</button>
+      </header>
+      <div class="format-grid">
+        <button class="btn bevel-out format-btn" data-format="wav">
+          <div>
+            <div class="format-label">WAV (Lossless)</div>
+            <div class="format-desc">Best quality • Includes metadata</div>
+          </div>
+          <div>→</div>
+        </button>
+        <button class="btn bevel-out format-btn" data-format="mp3">
+          <div>
+            <div class="format-label">MP3 (Compressed)</div>
+            <div class="format-desc">Smaller file • Wide compatibility</div>
+          </div>
+          <div>→</div>
+        </button>
+        <button class="btn bevel-out format-btn" data-format="ogg">
+          <div>
+            <div class="format-label">OGG (Compressed)</div>
+            <div class="format-desc">Open-source • Good quality</div>
+          </div>
+          <div>→</div>
+        </button>
       </div>
     </div>
   </div>
@@ -390,6 +421,9 @@
       const helpBtn = document.getElementById('helpBtn');
       const howto = document.getElementById('howto');
       const howtoClose = document.getElementById('howtoClose');
+      const exportPicker = document.getElementById('exportPicker');
+      const exportPickerClose = document.getElementById('exportPickerClose');
+      const exportOverlay = document.getElementById('exportOverlay');
 
       const file = document.getElementById('file');
       const fileName = document.getElementById('fileName');
@@ -413,9 +447,6 @@
       const resetBtn = document.getElementById('reset');
       const shareBtn = document.getElementById('shareBtn');
       const exportBtn = document.getElementById('export');
-      const playBtn = document.getElementById('play');
-      const seek = document.getElementById('seek');
-      const curT = document.getElementById('curT');
 
       /* ---------- Skins ---------- */
       const skins = ['classic','darkops','office'];
@@ -438,7 +469,6 @@
       let nodes = {};
       let originalBuffer=null; let originalURL=null; let reversedURL=null; let reversed=false;
       let recorder=null; let recordChunks=[];
-      let recordedBuffer=null; // Store recorded audio as AudioBuffer
       let micStream=null; let micSource=null; let loadedIRBuffer=null; let reverbWet=0.35;
       const effect = { distortion:false, echo:false, crush:false, glitch:false, reverb:false };
       let glitchTimer=null;
@@ -597,7 +627,6 @@
       file.addEventListener('change', ()=>{
         const f=file.files&&file.files[0]; if(!f) return;
         if(micStream) stopMic();
-        recordedBuffer=null; // Clear any previous recording
         fileName.textContent=f.name||'No file chosen';
         originalURL=URL.createObjectURL(f);
         player.src=originalURL; player.load();
@@ -688,7 +717,6 @@
         reversed=false; reverseBtn.dataset.active='false'; reverseBtn.setAttribute('aria-pressed','false'); if(originalURL){ player.src=originalURL; player.load(); }
         effect.distortion=false; effect.echo=false; effect.crush=false; effect.glitch=false; effect.reverb=false; toggleGlitch(false);
         if(reverbPresetSel) reverbPresetSel.value='off'; loadedIRBuffer=null;
-        recordedBuffer=null; // Clear any recorded audio
         [...effWrap.querySelectorAll('button[data-effect]')].forEach(b=>{ b.dataset.active='false'; b.setAttribute('aria-pressed','false'); });
         freq.value=1200; freqOut.textContent='1200Hz'; if(filter) filter.frequency.value=1200;
         pitch.value=1; pitchOut.textContent='1.00×'; player.playbackRate=1;
@@ -733,30 +761,14 @@
             recorder = new MediaRecorder(nodes.streamDest.stream, {mimeType:'audio/webm'});
             recorder.ondataavailable = e=>{ if(e.data.size>0) recordChunks.push(e.data); };
             recorder.onstop = ()=>{
-              // Convert recorded chunks to AudioBuffer
               const blob = new Blob(recordChunks, {type:'audio/webm'});
-              const reader = new FileReader();
-              reader.onload = ()=>{
-                audioCtx.decodeAudioData(reader.result)
-                  .then(buffer=>{
-                    recordedBuffer = buffer;
-                    recordBtn.textContent = '● Rec';
-                    recordBtn.dataset.active = 'false';
-                    
-                    // Show export modal for recorded audio
-                    alert('Recording complete! Click "Export Audio" to save your recording.');
-                    // Auto-highlight the export button
-                    exportBtn.style.animation = 'pulse 1s ease-in-out 3';
-                    setTimeout(()=>{ exportBtn.style.animation = ''; }, 3000);
-                  })
-                  .catch(err=>{
-                    console.error('Failed to decode recorded audio:', err);
-                    alert('Recording failed to process. Try recording again.');
-                    recordBtn.textContent = '● Rec';
-                    recordBtn.dataset.active = 'false';
-                  });
-              };
-              reader.readAsArrayBuffer(blob);
+              const a = document.createElement('a');
+              const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+              a.href = URL.createObjectURL(blob);
+              a.download = `radiofry_live_${stamp}.webm`;
+              a.click();
+              recordBtn.textContent = '● Rec';
+              recordBtn.dataset.active = 'false';
             };
             recorder.start();
             recordBtn.textContent = '⏹ Stop';
@@ -773,18 +785,8 @@
 
       /* ---------- WAV EXPORT with ISW Signature (RIFF INFO) ---------- */
       function renderOfflineBuffer(){
-        // Use recorded buffer if available, otherwise use original buffer
-        const sourceBuffer = recordedBuffer || originalBuffer;
-        
-        if(!sourceBuffer) return Promise.reject(new Error('No audio loaded'));
+        if(!originalBuffer) return Promise.reject(new Error('No audio loaded'));
         ensureContext();
-        
-        // If using recorded buffer, skip effects (already baked in)
-        if(recordedBuffer){
-          return Promise.resolve(recordedBuffer);
-        }
-        
-        // Otherwise apply effects to original buffer
         const srcBuf=reversed?buildReversedBuffer():originalBuffer;
         const ch=srcBuf.numberOfChannels, sr=srcBuf.sampleRate, frames=Math.ceil(srcBuf.length/Math.max(0.0001,+pitch.value));
         const off=new OfflineAudioContext(ch,frames,sr);
@@ -813,10 +815,35 @@
         return off.startRendering();
       }
 
+      /* ---------- Export Modal & Handlers ---------- */
       exportBtn.addEventListener('click', ()=>{
-        if(!originalBuffer && !recordedBuffer) return alert('Upload audio first or record something');
-        // Export WAV directly
-        exportWav();
+        if(!originalBuffer) return alert('Upload audio first');
+        exportPicker.classList.add('show');
+        exportOverlay.classList.add('show');
+      });
+
+      exportPickerClose.addEventListener('click', ()=>{
+        exportPicker.classList.remove('show');
+        exportOverlay.classList.remove('show');
+      });
+
+      exportOverlay.addEventListener('click', ()=>{
+        howto.classList.remove('show');
+        exportPicker.classList.remove('show');
+        exportOverlay.classList.remove('show');
+      });
+
+      exportPicker.querySelector('.format-grid').addEventListener('click', e=>{
+        const formatBtn = e.target.closest('[data-format]');
+        if(!formatBtn) return;
+        
+        const format = formatBtn.dataset.format;
+        exportPicker.classList.remove('show');
+        exportOverlay.classList.remove('show');
+
+        if(format === 'wav') exportWav();
+        else if(format === 'mp3') exportMp3();
+        else if(format === 'ogg') exportOgg();
       });
 
       function exportWav(){
@@ -834,107 +861,120 @@
           .catch(err=>{ console.error(err); alert('Render failed'); });
       }
 
-      function bufferToWavWithInfo(buf, comment){
-        const ch=buf.numberOfChannels, sr=buf.sampleRate;
-        const samples=buf.length;
-        const dataLen=samples*ch*2;
-
-        const pcm = new Int16Array(samples*ch);
-        let i=0;
-        for(let s=0;s<samples;s++){
-          for(let c=0;c<ch;c++){
-            let v=buf.getChannelData(c)[s]*0x7FFF;
-            v=Math.max(-32768,Math.min(32767,v));
-            pcm[i++]=v;
-          }
-        }
-
-        function pad2(n){ return (n%2) ? n+1 : n; }
-        const txt = new TextEncoder().encode(comment + '\0');
-        const icmtSize = 4 + 4 + pad2(txt.length);
-        const listSize = 4 + 4 + icmtSize;
-        const riffSize = 4 + (8+16) + (8+dataLen) + (8+listSize);
-
-        const ab = new ArrayBuffer(8 + riffSize);
-        const view = new DataView(ab);
-        let o=0;
-        const ws=s=>{ for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); o+=s.length; };
-
-        ws('RIFF'); view.setUint32(o, riffSize, true); o+=4; ws('WAVE');
-        ws('fmt '); view.setUint32(o,16,true); o+=4;
-        view.setUint16(o,1,true); o+=2;
-        view.setUint16(o,ch,true); o+=2;
-        view.setUint32(o,sr,true); o+=4;
-        view.setUint32(o,sr*ch*2,true); o+=4;
-        view.setUint16(o,ch*2,true); o+=2;
-        view.setUint16(o,16,true); o+=2;
-
-        ws('data'); view.setUint32(o,dataLen,true); o+=4;
-        for(let j=0;j<pcm.length;j++) view.setInt16(o + j*2, pcm[j], true);
-        o += dataLen;
-        if (dataLen % 2) { view.setUint8(o, 0); o+=1; }
-
-        ws('LIST'); view.setUint32(o, listSize, true); o+=4;
-        ws('INFO');
-        ws('ICMT'); view.setUint32(o, txt.length, true); o+=4;
-        new Uint8Array(ab, o, txt.length).set(txt); o += pad2(txt.length);
-
-        return ab;
+      function exportMp3(){
+        renderOfflineBuffer()
+          .then(rendered=>{
+            const ch=rendered.numberOfChannels, sr=rendered.sampleRate, len=rendered.length;
+            const encCtx = new (window.AudioContext||window.webkitAudioContext)({sampleRate:sr});
+            const encSource = encCtx.createBufferSource();
+            encSource.buffer = rendered;
+            const dest = encCtx.createMediaStreamDestination();
+            encSource.connect(dest);
+            const chunks = [];
+            const mimeTypes = ['audio/mpeg', 'audio/mp4', 'audio/webm;codecs=opus'];
+            let selectedMime = null;
+            for(let mime of mimeTypes){
+              if(MediaRecorder.isTypeSupported(mime)){
+                selectedMime = mime;
+                break;
+              }
+            }
+            if(!selectedMime){
+              alert('MP3 export not supported in this browser. Try WAV or OGG instead.');
+              encCtx.close();
+              return;
+            }
+            const recorder = new MediaRecorder(dest.stream, {mimeType:selectedMime});
+            recorder.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+            recorder.onstop = ()=>{
+              const ext = selectedMime.includes('mpeg') ? 'mp3' : selectedMime.includes('mp4') ? 'm4a' : 'webm';
+              const blob = new Blob(chunks, {type:selectedMime});
+              const a = document.createElement('a');
+              const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+              a.href = URL.createObjectURL(blob);
+              a.download = `radiofry_export_isw_${stamp}.${ext}`;
+              a.click();
+              encCtx.close();
+            };
+            recorder.start();
+            encSource.start(0);
+            setTimeout(()=>{ recorder.stop(); }, (len/sr)*1000 + 500);
+          })
+          .catch(err=>{ console.error(err); alert('MP3 export failed'); });
       }
 
-      /* Help popup */
-      helpBtn.addEventListener('click', ()=> howto.classList.toggle('show'));
-      howtoClose.addEventListener('click', ()=> howto.classList.remove('show'));
-
-      /* Share: copy reloadable URL with UTM */
-      function shareURL(){
-        const base = "https://ironsignalworks.com/radiofry";
-        const p = new URLSearchParams();
-        p.set('sk', skins[skinIndex]);
-        p.set('fxd', String(effect.distortion));
-        p.set('fxe', String(effect.echo));
-        p.set('fxc', String(effect.crush));
-        p.set('fxg', String(effect.glitch));
-        p.set('rev', String(reverbPresetSel.value||'off'));
-        p.set('fq', String(freq.value));
-        p.set('pt', String(pitch.value));
-        p.set('vl', String(vol.value));
-        p.set('rvd', String(reversed));
-        p.set('utm_source','radiofry');
-        p.set('utm_medium','share');
-        p.set('utm_campaign','lab-to-site');
-        const url = base + '?' + p.toString();
-        navigator.clipboard.writeText(url).then(()=>{
-          shareBtn.textContent='Copied!';
-          setTimeout(()=> shareBtn.textContent='Share', 1200);
-        });
+      function exportOgg(){
+        renderOfflineBuffer()
+          .then(rendered=>{
+            const ch=rendered.numberOfChannels, sr=rendered.sampleRate, len=rendered.length;
+            const encCtx = new (window.AudioContext||window.webkitAudioContext)({sampleRate:sr});
+            const encSource = encCtx.createBufferSource();
+            encSource.buffer = rendered;
+            const dest = encCtx.createMediaStreamDestination();
+            encSource.connect(dest);
+            const chunks = [];
+            const mimeTypes = ['audio/ogg;codecs=opus', 'audio/webm;codecs=opus', 'audio/ogg'];
+            let selectedMime = null;
+            for(let mime of mimeTypes){
+              if(MediaRecorder.isTypeSupported(mime)){
+                selectedMime = mime;
+                break;
+              }
+            }
+            if(!selectedMime){
+              alert('OGG export not supported in this browser. Try WAV instead.');
+              encCtx.close();
+              return;
+            }
+            const recorder = new MediaRecorder(dest.stream, {mimeType:selectedMime});
+            recorder.ondataavailable = e=>{ if(e.data.size>0) chunks.push(e.data); };
+            recorder.onstop = ()=>{
+              const ext = selectedMime.includes('ogg') ? 'ogg' : 'webm';
+              const blob = new Blob(chunks, {type:selectedMime});
+              const a = document.createElement('a');
+              const stamp = new Date().toISOString().replace(/[:.]/g,'-');
+              a.href = URL.createObjectURL(blob);
+              a.download = `radiofry_export_isw_${stamp}.${ext}`;
+              a.click();
+              encCtx.close();
+            };
+            recorder.start();
+            encSource.start(0);
+            setTimeout(()=>{ recorder.stop(); }, (len/sr)*1000 + 500);
+          })
+          .catch(err=>{ console.error(err); alert('OGG export failed'); });
       }
-      shareBtn.addEventListener('click', shareURL);
+ 
 
-      // Load from params
-      (function initFromParams(){
-        const p = new URLSearchParams(location.search);
-        const sk = p.get('sk'); if(sk){ skinIndex = Math.max(0, ['classic','darkops','office'].indexOf(sk)); applySkin(skins[skinIndex]||'classic'); }
-        const parseBool = v => v === 'true';
-        effect.distortion = parseBool(p.get('fxd'));
-        effect.echo       = parseBool(p.get('fxe'));
-        effect.crush      = parseBool(p.get('fxc'));
-        effect.glitch     = parseBool(p.get('fxg'));
-        const rev = p.get('rev'); if(rev){ reverbPresetSel.value = rev; effect.reverb = rev !== 'off'; if(effect.reverb){ loadIR(rev); } }
-        const fq = p.get('fq');  if(fq){ freq.value = +fq; freqOut.textContent = `${Math.round(fq)}Hz`; }
-        const pt = p.get('pt');  if(pt){ pitch.value = +pt; pitchOut.textContent = Number(pt).toFixed(2)+'×'; }
-        const vl = p.get('vl');  if(vl){ vol.value = +vl; volOut.textContent = Number(vl).toFixed(2); }
-        const rvd = p.get('rvd'); if(rvd){ reversed = parseBool(rvd); reverseBtn.dataset.active=String(reversed); reverseBtn.setAttribute('aria-pressed', String(reversed)); }
-
-        [...effWrap.querySelectorAll('button[data-effect]')].forEach(b=>{
-          const n=b.dataset.effect; b.dataset.active=String(!!effect[n]); b.setAttribute('aria-pressed', String(!!effect[n]));
+      /* ------------------ DEMO MODE ONLY ------------------ */
+      // Disable controls and auto-load a demo file
+      const demoFile = 'audio/demo-clip.mp3';
+      document.getElementById('file').remove();
+      document.getElementById('micBtn').remove();
+      document.getElementById('shareBtn').remove();
+      document.querySelector('footer').style.justifyContent='center';
+      const demoNotice = document.createElement('div');
+      demoNotice.style.cssText=`
+        position:absolute; top:12px; right:12px; left:12px; z-index:50;
+        background:rgba(255,255,255,0.9); border:2px solid #000;
+        border-radius:8px; padding:12px; text-align:center;
+        font-family:monospace; font-size:.85rem;
+      `;
+      demoNotice.innerHTML=`
+        <strong>Demo Mode</strong> — Interactive controls are disabled.
+        <br>Drag & drop your own audio file, then explore the effects and settings.
+      `;
+      document.body.appendChild(demoNotice);
+      fetch(demoFile)
+        .then(r=>r.blob())
+        .then(blob=>{
+          const url = URL.createObjectURL(blob);
+          fileName.textContent = 'demo-clip.mp3';
+          player.src = url;
+          player.load();
+          player.play();  /* Preview demo file automatically */
+          setTimeout(()=>{ player.currentTime=30; }, 5000);  /* Skip ahead after 5 seconds */
         });
-
-        rebuildGraph();
-      })();
-
-      window.addEventListener('resize', setCanvasSize, {passive:true});
-      setCanvasSize(); ensureContext(); requestAnimationFrame(visualize);
     })();
   </script>
 </body>

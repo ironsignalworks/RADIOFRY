@@ -1,0 +1,109 @@
+// Add this code BEFORE the demo mode section (replace everything from "/* ------------------ DEMO MODE" to the end)
+
+      function bufferToWavWithInfo(buf, comment){
+        const ch=buf.numberOfChannels, sr=buf.sampleRate;
+        const samples=buf.length;
+        const dataLen=samples*ch*2;
+
+        // Build PCM data
+        const pcm = new Int16Array(samples*ch);
+        let i=0;
+        for(let s=0;s<samples;s++){
+          for(let c=0;c<ch;c++){
+            let v=buf.getChannelData(c)[s]*0x7FFF;
+            v=Math.max(-32768,Math.min(32767,v));
+            pcm[i++]=v;
+          }
+        }
+
+        // Build LIST/INFO (ICMT) chunk
+        function pad2(n){ return (n%2) ? n+1 : n; }
+        const txt = new TextEncoder().encode(comment + '\0');
+        const icmtSize = 4 + 4 + pad2(txt.length);
+        const listSize = 4 + 4 + icmtSize;
+        const riffSize = 4 + (8+16) + (8+dataLen) + (8+listSize);
+
+        const ab = new ArrayBuffer(8 + riffSize);
+        const view = new DataView(ab);
+        let o=0;
+        const ws=s=>{ for(let i=0;i<s.length;i++) view.setUint8(o+i,s.charCodeAt(i)); o+=s.length; };
+
+        ws('RIFF'); view.setUint32(o, riffSize, true); o+=4; ws('WAVE');
+        ws('fmt '); view.setUint32(o,16,true); o+=4;
+        view.setUint16(o,1,true); o+=2;
+        view.setUint16(o,ch,true); o+=2;
+        view.setUint32(o,sr,true); o+=4;
+        view.setUint32(o,sr*ch*2,true); o+=4;
+        view.setUint16(o,ch*2,true); o+=2;
+        view.setUint16(o,16,true); o+=2;
+
+        ws('data'); view.setUint32(o,dataLen,true); o+=4;
+        for(let j=0;j<pcm.length;j++) view.setInt16(o + j*2, pcm[j], true);
+        o += dataLen;
+        if (dataLen % 2) { view.setUint8(o, 0); o+=1; }
+
+        ws('LIST'); view.setUint32(o, listSize, true); o+=4;
+        ws('INFO');
+        ws('ICMT'); view.setUint32(o, txt.length, true); o+=4;
+        new Uint8Array(ab, o, txt.length).set(txt); o += pad2(txt.length);
+
+        return ab;
+      }
+
+      /* Help popup */
+      helpBtn.addEventListener('click', ()=> howto.classList.toggle('show'));
+      howtoClose.addEventListener('click', ()=> howto.classList.remove('show'));
+
+      /* Share: copy reloadable URL with UTM */
+      function shareURL(){
+        const base = "https://ironsignalworks.com/radiofry";
+        const p = new URLSearchParams();
+        p.set('sk', skins[skinIndex]);
+        p.set('fxd', String(effect.distortion));
+        p.set('fxe', String(effect.echo));
+        p.set('fxc', String(effect.crush));
+        p.set('fxg', String(effect.glitch));
+        p.set('rev', String(reverbPresetSel.value||'off'));
+        p.set('fq', String(freq.value));
+        p.set('pt', String(pitch.value));
+        p.set('vl', String(vol.value));
+        p.set('rvd', String(reversed));
+        p.set('utm_source','radiofry');
+        p.set('utm_medium','share');
+        p.set('utm_campaign','lab-to-site');
+        const url = base + '?' + p.toString();
+        navigator.clipboard.writeText(url).then(()=>{
+          shareBtn.textContent='Copied!';
+          setTimeout(()=> shareBtn.textContent='Share', 1200);
+        });
+      }
+      shareBtn.addEventListener('click', shareURL);
+
+      // Load from params
+      (function initFromParams(){
+        const p = new URLSearchParams(location.search);
+        const sk = p.get('sk'); if(sk){ skinIndex = Math.max(0, ['classic','darkops','office'].indexOf(sk)); applySkin(skins[skinIndex]||'classic'); }
+        const parseBool = v => v === 'true';
+        effect.distortion = parseBool(p.get('fxd'));
+        effect.echo       = parseBool(p.get('fxe'));
+        effect.crush      = parseBool(p.get('fxc'));
+        effect.glitch     = parseBool(p.get('fxg'));
+        const rev = p.get('rev'); if(rev){ reverbPresetSel.value = rev; effect.reverb = rev !== 'off'; if(effect.reverb){ loadIR(rev); } }
+        const fq = p.get('fq');  if(fq){ freq.value = +fq; freqOut.textContent = `${Math.round(fq)}Hz`; }
+        const pt = p.get('pt');  if(pt){ pitch.value = +pt; pitchOut.textContent = Number(pt).toFixed(2)+'×'; }
+        const vl = p.get('vl');  if(vl){ vol.value = +vl; volOut.textContent = Number(vl).toFixed(2); }
+        const rvd = p.get('rvd'); if(rvd){ reversed = parseBool(rvd); reverseBtn.dataset.active=String(reversed); reverseBtn.setAttribute('aria-pressed', String(reversed)); }
+
+        [...effWrap.querySelectorAll('button[data-effect]')].forEach(b=>{
+          const n=b.dataset.effect; b.dataset.active=String(!!effect[n]); b.setAttribute('aria-pressed', String(!!effect[n]));
+        });
+
+        rebuildGraph();
+      })();
+
+      window.addEventListener('resize', setCanvasSize, {passive:true});
+      setCanvasSize(); ensureContext(); requestAnimationFrame(visualize);
+    })();
+  </script>
+</body>
+</html>
