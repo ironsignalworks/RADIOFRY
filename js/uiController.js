@@ -51,7 +51,14 @@ export class UIController {
   }
 
   togglePlayButton(playing, playBtn) {
-    playBtn.textContent = playing ? '?' : '?';
+    const iconSpan = playBtn.querySelector('.play-icon');
+    if (iconSpan) {
+      // Use HTML entities for better cross-browser compatibility
+      iconSpan.innerHTML = playing ? '&#9208;' : '&#9654;';
+    } else {
+      // Fallback if span doesn't exist
+      playBtn.innerHTML = playing ? '&#9208;' : '&#9654;';
+    }
   }
 
   showRecordingComplete(exportBtn) {
